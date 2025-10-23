@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="ne">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>IRD E-Services Portal</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:"Segoe UI",Arial,sans-serif;background:#f0f4fb;color:#333;height:100vh;}
+    #loginPage{display:flex;justify-content:center;align-items:center;height:100vh;background:linear-gradient(120deg,#cfd6dd,#d5e0e9);}
+    .login-box{background:#fff;padding:30px;border-radius:10px;box-shadow:0 0 20px rgba(0,0,0,0.3);width:320px;text-align:center;}
+    .login-box h2{margin-bottom:15px;color:#003366;}
+    .login-box input{width:100%;padding:10px;margin:8px 0;border:1px solid #ccc;border-radius:5px;}
+    .login-box button{width:100%;padding:10px;background:#003366;color:#fff;border:none;border-radius:5px;cursor:pointer;font-size:16px;}
+    .login-box button:hover{background:#0055aa;}
+    .error-msg{color:red;font-size:13px;display:none;}
+    #mainPage{display:none;height:100vh;overflow:hidden;}
+    header{background:linear-gradient(90deg,#002b5c,#004b8d);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:8px 20px;}
+    header img{height:60px;}
+    header .title{text-align:center;flex-grow:1;}
+    header .title h1{font-size:22px;}
+    .container{display:grid;grid-template-columns:250px 1fr;height:calc(100vh - 75px);}
+    .sidebar{background:#e9eff7;border-right:2px solid #c3cbe0;padding:10px;overflow-y:auto;}
+    .sidebar h3{color:#003366;margin-bottom:10px;}
+    .folder>div{cursor:pointer;padding:6px 10px;border-radius:4px;display:flex;align-items:center;}
+    .folder ul{margin-left:20px;margin-top:5px;list-style:none;display:none;}
+    .folder.open>ul{display:block;}
+    .folder ul li a{text-decoration:none;color:#003366;display:block;padding:4px 8px;border-radius:4px;}
+    .folder ul li a:hover{background:#c7d7f0;}
+    main{background:#fff;}
+    iframe{width:100%;height:100%;border:none;}
+    footer{background:#002b5c;color:#fff;text-align:center;font-size:12px;padding:6px;}
+  </style>
+</head>
+<body>
+
+<div id="loginPage">
+  <div class="login-box">
+    <h2>Arun Login Portal</h2>
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
+    <div class="error-msg" id="error">Invalid username or password!</div>
+    <button onclick="login()">Login</button>
+    <p style="font-size:12px;margin-top:10px;">Use Info <b>Admin</b> / <b>*****</b></p>
+  </div>
+</div>
+
+<div id="mainPage">
+  <header>
+    <img src="https://ird.gov.np/img/logo.png" alt="IRD Logo" onerror="this.style.display='none'">
+    <div class="title">
+      <h1>आन्तरिक राजस्व विभाग</h1>
+      <p>Inland Revenue Department, Government of Nepal</p>
+    </div>
+    <img src="https://upload.wikimedia.org/wikipedia/commons/9/9b/Flag_of_Nepal.svg" alt="Nepal Flag">
+  </header>
+
+  <div class="container">
+    <div class="sidebar">
+      <h3>Online E-Services</h3>
+      <div class="folder">
+        <div onclick="toggleFolder(this)">📁 Integrated Tax System</div>
+        <ul>
+          <li><a href="https://ird.gov.np" target="contentFrame">General</a></li>
+          <li><a href="https://ird.gov.np/pan" target="contentFrame">Registration (PAN,VAT,EXCISE)</a></li>
+          <li><a href="https://ird.gov.np/vat" target="contentFrame">VAT</a></li>
+        </ul>
+      </div>
+      <div class="folder">
+        <div onclick="toggleFolder(this)">📁 Esewa</div>
+        <ul>
+          <li><a href="#" onclick="loadEsewaForm()">Form Submission</a></li>
+          <li><a href="#" onclick="loadCertificate()">Download Certificate</a></li>
+        </ul>
+      </div>
+    <div class="folder">
+        <div onclick="toggleFolder(this)">📁 Collector Entry</div>
+        <ul>
+          <li><a href="Collector Entry/collector-entry.html" target="contentFrame">Collector Entry</a></li>
+        </ul>
+      </div>
+    
+      <div class="folder">
+        <div onclick="toggleFolder(this)">📁 Banks</div>
+        <ul>
+          <li><a href="Online E-Services/Banks/bank-statement-update.html" target="contentFrame">Bank Statement Updater</a></li>\n          <li><a href="Online E-Services/Banks/statement-download.html" target="contentFrame">Statement Download</a></li>
+        </ul>
+      </div>
+      <div class="folder">
+        <div onclick="toggleFolder(this)">📁 Collector</div>
+        <ul>
+          <li><a href="Online E-Services/Collector/collector-details.html" target="contentFrame">Collector Details</a></li>\n          <li><a href="Online E-Services/Collector/collector-download.html" target="contentFrame">Collector Download</a></li>
+        </ul>
+      </div>
+    </div>
+    <main><iframe name="contentFrame" id="contentFrame"></iframe></main>
+  </div>
+
+  <footer>© 2025 Inland Revenue Department, Government of Nepal</footer>
+</div>
+
+<script>
+function login(){
+  const u=document.getElementById('username').value.trim();
+  const p=document.getElementById('password').value.trim();
+  if(u==='Admin'&&p==='Admin123'){
+    document.getElementById('loginPage').style.display='none';
+    document.getElementById('mainPage').style.display='block';
+  }else{
+    const e=document.getElementById('error');
+    e.style.display='block';
+    setTimeout(()=>e.style.display='none',3000);
+  }
+}
+function toggleFolder(el){el.parentElement.classList.toggle('open');}
+
+function loadEsewaForm(){
+const f=document.getElementById('contentFrame');
+f.srcdoc=`<html><head><meta charset='utf-8'><title>Esewa Form</title>
+<style>
+body{font-family:"Segoe UI",sans-serif;background:#f4f6fb;padding:25px;}
+.form-container{max-width:820px;margin:auto;}
+form{background:#fff;padding:25px;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.1);}
+form h2{text-align:center;color:#003366;margin-bottom:18px;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:15px;}
+label{font-weight:600;color:#003366;}
+input,select{width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;}
+.actions{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-top:15px;}
+button{padding:10px 16px;border:none;border-radius:6px;cursor:pointer;font-weight:600;}
+button.small{font-size:14px;}
+button.export{background:#28a745;color:#fff;}
+button.secondary{background:#5a7fa8;color:#fff;}
+button.submit{background:#003366;color:#fff;}
+.table-wrap{margin-top:25px;overflow:auto;}
+table{width:100%;border-collapse:collapse;}
+th,td{border:1px solid #dee2e6;padding:10px;text-align:center;font-size:14px;}
+th{background:#003366;color:#fff;}
+.btn-small{padding:5px 10px;border-radius:4px;font-size:13px;}
+.edit{background:#f0ad4e;color:#fff;border:none;}
+.del{background:#d9534f;color:#fff;border:none;}
+.search{margin-top:10px;padding:8px;width:220px;border-radius:6px;border:1px solid #ccc;}
+.count{font-size:13px;color:#333;margin-top:5px;}
+.filter-buttons{margin-top:10px;}
+.filter-buttons button{padding:6px 12px;margin-right:6px;border:none;border-radius:5px;background:#5a7fa8;color:#fff;cursor:pointer;font-size:13px;}
+.filter-buttons button:hover{background:#003366;}
+</style></head><body>
+<div class='form-container'>
+<form id='esewaForm'>
+<h2>Esewa Form Submission</h2>
+<div class='grid'>
+<div><label>Date</label><input type='date' id='date' required></div>
+<div><label>Esewa TRX Code</label><input type='text' id='trx' placeholder='Enter Esewa Transaction Code' required></div>
+<div><label>Sender Name</label><input type='text' id='sender' placeholder='Enter Sender Name' required></div>
+<div><label>Amount (NPR)</label><input type='number' id='amount' placeholder='Enter Amount' min='0' required></div>
+<div><label>Status</label><select id='status'><option>Pending</option><option>Approved</option><option>Failed</option></select></div>
+</div>
+<div class='actions'>
+<div><button type='button' id='exportCSV' class='small export'>Export CSV</button> <button type='button' id='exportXLS' class='small export'>Export Excel (.xls)</button></div>
+<div><button type='reset' class='small secondary'>Reset</button> <button type='submit' id='submitBtn' class='small submit'>Submit</button></div>
+</div>
+</form>
+
+<!-- Quick filter buttons -->
+<div class="filter-buttons">
+  <button onclick="render('Pending')">Pending</button>
+  <button onclick="render('Approved')">Approved</button>
+  <button onclick="render('Failed')">Failed</button>
+  <button onclick="render('')">All</button>
+</div>
+
+<div>
+  <input type='text' id='searchInput' class='search' placeholder='Search TRX / Sender / Status / Date...'>
+  <div class='count'>Total entries: <span id='totalCount'>0</span></div>
+</div>
+<div class='table-wrap'><table id='dataTable'><thead><tr><th>#</th><th>Date</th><th>TRX Code</th><th>Sender</th><th>Amount (NPR)</th><th>Status</th><th>Actions</th></tr></thead><tbody></tbody></table></div>
+</div>
+
+<script>
+const STORAGE_KEY='esewa_entries_v1';
+let entries=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');
+let editId=null;
+const form=document.getElementById('esewaForm');
+const dateEl=document.getElementById('date');
+const trxEl=document.getElementById('trx');
+const senderEl=document.getElementById('sender');
+const amountEl=document.getElementById('amount');
+const statusEl=document.getElementById('status');
+const tableBody=document.querySelector('#dataTable tbody');
+const totalCountEl=document.getElementById('totalCount');
+const searchInput=document.getElementById('searchInput');
+
+function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(entries));}
+
+function render(filter=''){
+  const q=filter.trim().toLowerCase();
+  let list = entries.filter(e=>{
+    if(!q) return true;
+    // match against trx, sender, status, date, amount
+    const trx = (e.trx||'').toLowerCase();
+    const sender = (e.sender||'').toLowerCase();
+    const status = (e.status||'').toLowerCase();
+    const date = (e.date||'').toLowerCase();
+    const amount = String(e.amount || '').toLowerCase();
+    return trx.includes(q) || sender.includes(q) || status.includes(q) || date.includes(q) || amount.includes(q);
+  });
+
+  tableBody.innerHTML='';
+  // show latest first
+  list.slice().reverse().forEach((e,i)=>{
+    tableBody.innerHTML+=\`<tr>
+      <td>\${i+1}</td>
+      <td>\${e.date}</td>
+      <td>\${e.trx}</td>
+      <td>\${e.sender || ''}</td>
+      <td>\${Number(e.amount).toLocaleString()}</td>
+      <td>\${e.status}</td>
+      <td><button class='btn-small edit' data-id='\${e.id}'>Edit</button> <button class='btn-small del' data-id='\${e.id}'>Delete</button></td>
+    </tr>\`;
+  });
+  totalCountEl.textContent=list.length;
+}
+
+render();
+
+form.addEventListener('submit',e=>{
+  e.preventDefault();
+  const d={
+    id: editId || ('id_'+Date.now()),
+    date: dateEl.value,
+    trx: trxEl.value.trim(),
+    sender: senderEl.value.trim(),
+    amount: Number(amountEl.value) || 0,
+    status: statusEl.value,
+    createdAt: Date.now()
+  };
+  if(!d.date || !d.trx || !d.sender){
+    alert('Please fill Date, TRX and Sender fields');
+    return;
+  }
+  if(editId){
+    entries = entries.map(x=> x.id===editId ? d : x);
+    editId = null;
+    alert('Entry updated!');
+    document.getElementById('submitBtn').textContent='Submit';
+  }else{
+    entries.push(d);
+    alert('Form Submitted!');
+  }
+  save();
+  form.reset();
+  render(searchInput.value.trim());
+});
+
+tableBody.addEventListener('click',e=>{
+  if(e.target.classList.contains('edit')){
+    const id=e.target.dataset.id;
+    const item=entries.find(x=>x.id===id);
+    if(item){
+      dateEl.value=item.date || '';
+      trxEl.value=item.trx || '';
+      senderEl.value=item.sender || '';
+      amountEl.value=item.amount || '';
+      statusEl.value=item.status || 'Pending';
+      editId=id;
+      document.getElementById('submitBtn').textContent='Update';
+      form.scrollIntoView({behavior:'smooth'});
+    }
+  }
+  if(e.target.classList.contains('del')){
+    if(confirm('Delete this entry?')){
+      entries = entries.filter(x=>x.id!==e.target.dataset.id);
+      save();
+      render(searchInput.value.trim());
+    }
+  }
+});
+
+searchInput.addEventListener('input',()=>render(searchInput.value.trim()));
+
+// CSV Export
+document.getElementById('exportCSV').addEventListener('click',()=>{
+  if(entries.length===0){alert('No data');return;}
+  const header=['Date','TRX Code','Sender','Amount','Status'];
+  // make rows descending (latest first)
+  const rows = entries.slice().reverse().map(e=>[
+    e.date,
+    e.trx,
+    e.sender || '',
+    e.amount,
+    e.status
+  ]);
+  // CSV escaping: wrap each field that contains comma or quote in double quotes and escape quotes
+  const csv = [header, ...rows].map(r => r.map(field => {
+    const s = String(field ?? '');
+    if(s.includes('"')) return '"' + s.replace(/"/g,'""') + '"';
+    if(s.includes(',') || s.includes('\\n')) return '"' + s + '"';
+    return s;
+  }).join(',')).join('\\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='esewa_entries.csv';a.click();URL.revokeObjectURL(url);
+});
+
+// XLS Export (simple HTML table)
+document.getElementById('exportXLS').addEventListener('click',()=>{
+  if(entries.length===0){alert('No data');return;}
+  let html='<table border=1><tr><th>Date</th><th>TRX Code</th><th>Sender</th><th>Amount</th><th>Status</th></tr>';
+  entries.slice().reverse().forEach(e=>{
+    html+=\`<tr><td>\${e.date}</td><td>\${e.trx}</td><td>\${(e.sender||'')}</td><td>\${e.amount}</td><td>\${e.status}</td></tr>\`;
+  });
+  html+='</table>';
+  const blob=new Blob([html],{type:'application/vnd.ms-excel'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='esewa_entries.xls';a.click();URL.revokeObjectURL(url);
+});
+<\/script></body></html>`;
+}
+
+function loadCertificate(){
+const f=document.getElementById('contentFrame');
+f.srcdoc=`<html><head><meta charset='utf-8'><title>Certificate</title>
+<style>body{font-family:Arial;background:#fff;padding:20px;}
+h2{text-align:center;color:#003366;margin-bottom:10px;}
+button{padding:8px 12px;background:#003366;color:#fff;border:none;border-radius:5px;cursor:pointer;margin-bottom:10px;}
+table{width:100%;border-collapse:collapse;}
+th,td{border:1px solid:#000;padding:6px;text-align:center;}
+th{background:#f0f0f0;}
+@media print{button{display:none}}</style></head><body>
+<h2>Esewa Form Submission Certificate</h2>
+<button onclick="window.print()">📄 Download Certificate (PDF)</button>
+<table id='tbl'><thead><tr><th>#</th><th>Date</th><th>TRX Code</th><th>Sender</th><th>Amount (NPR)</th><th>Status</th></tr></thead><tbody></tbody></table>
+<script>
+const arr=JSON.parse(localStorage.getItem('esewa_entries_v1')||'[]');
+const tb=document.querySelector('#tbl tbody');
+if(!arr || arr.length==0){
+  tb.innerHTML='<tr><td colspan=6>No records found</td></tr>';
+}else{
+  // show latest first
+  arr.slice().reverse().forEach((e,i)=>{
+    const amountFormatted = Number(e.amount || 0).toLocaleString();
+    tb.innerHTML+=\`<tr><td>\${i+1}</td><td>\${e.date}</td><td>\${e.trx}</td><td>\${e.sender||''}</td><td>\${amountFormatted}</td><td>\${e.status}</td></tr>\`;
+  });
+}
+<\/script></body></html>`;
+}
+</script>
+
+<!-- Firebase Sync module: loads firebase-sync.js and attempts to sync local keys with Firestore.
+     IMPORTANT: Open firebase-sync.js and replace firebaseConfig with your Firebase project's config.
+-->
+<script type="module">
+import { initFirebase, loadKey, saveKey, subscribeKey } from './firebase-sync.js';
+
+(async ()=>{
+  try{
+    await initFirebase();
+  }catch(e){
+    console.warn('Firebase init failed (please edit firebase-sync.js and add config).', e);
+    return;
+  }
+
+  // Map of localStorage keys used by this app and behavior
+  const syncKeys = [
+    'bank_statement_html_v2',
+    'esewa_entries_v1',
+    'collectorData_v_final',
+    'denominationData_v_final',
+    'collectorHistory_v1',
+    'collectorNotes_v_final',
+    'autoSaveEnabled_v_final'
+  ];
+
+  // On load: try load each key from Firestore and populate localStorage if found.
+  for(const k of syncKeys){
+    try{
+      const v = await loadKey(k);
+      if(v!==null){
+        // Store as string in localStorage (same shape as original apps expect)
+        localStorage.setItem(k, JSON.stringify(v));
+        console.log('Loaded',k,'from Firestore');
+      }
+    }catch(e){ console.warn('Load key error',k,e); }
+  }
+
+  // Setup real-time subscriptions: when remote changes, update localStorage (and trigger storage event)
+  for(const k of syncKeys){
+    try{
+      subscribeKey(k, (val)=>{
+        if(val===null){ return; }
+        localStorage.setItem(k, JSON.stringify(val));
+        // fire a storage-like event for other frames
+        try{ window.dispatchEvent(new Event('storage')); }catch(e){}
+        console.log('Realtime update applied for',k);
+      });
+    }catch(e){ console.warn('Subscribe failed for',k,e); }
+  }
+
+  // Watch localStorage changes and push them to Firestore for the keys listed
+  window.addEventListener('beforeunload', async ()=>{
+    for(const k of syncKeys){
+      const raw = localStorage.getItem(k);
+      if(raw===null) continue;
+      try{
+        const parsed = JSON.parse(raw);
+        await saveKey(k, parsed);
+        console.log('Saved on unload',k);
+      }catch(e){ console.warn('Save on unload failed',k,e); }
+    }
+  });
+
+  // Also listen to custom event to force-save a key: window.dispatchEvent(new CustomEvent('fsave',{detail:{key:'...',value:...}}))
+  window.addEventListener('fsave', async (ev)=>{
+    const {key, value} = ev.detail || {};
+    if(!key) return;
+    try{ await saveKey(key, value); console.log('Saved key via fsave',key); }catch(e){console.warn(e);}
+  });
+
+})();
+</script>
+</body>
+</html>
+
+</body>
+      <button id="backupBtn">📦 Backup to Google Drive</button>
+      <button id="restoreBtn">🔁 Restore from Google Drive</button>
+    </div>
+  </footer>
+</div>
+
+<script>
+function login(){
+  const u=document.getElementById('username').value.trim();
+  const p=document.getElementById('password').value.trim();
+  if(u==='Admin'&&p==='Admin123'){
+    document.getElementById('loginPage').style.display='none';
+    document.getElementById('mainPage').style.display='block';
+  }else{
+    const e=document.getElementById('error');
+    e.style.display='block';
+    setTimeout(()=>e.style.display='none',3000);
+  }
+}
+function toggleFolder(el){el.parentElement.classList.toggle('open');}
+</script>
+
+<!-- Firebase Sync kept active -->
+<script type="module">
+import { initFirebase, loadKey, saveKey, subscribeKey } from './firebase-sync.js';
+(async ()=>{
+ try{await initFirebase();}catch(e){console.warn('Firebase init failed');return;}
+ const syncKeys=['bank_statement_html_v2','esewa_entries_v1','collectorData_v_final'];
+ for(const k of syncKeys){
+   try{const v=await loadKey(k);if(v!==null)localStorage.setItem(k,JSON.stringify(v));}catch(e){}
+ }
+ window.addEventListener('beforeunload',async()=>{
+   for(const k of syncKeys){
+     const raw=localStorage.getItem(k);if(!raw)continue;
+     try{await saveKey(k,JSON.parse(raw));}catch(e){}
+   }
+ });
+})();
+</script>
+
+<!-- === Google Drive Backup + Auto-Restore (final fixed version) === -->
+<script src="https://apis.google.com/js/api.js"></script>
+<script>
+const CLIENT_ID = '43860508611-ki9ekbtvguadckha02e7mbclmf6kth8d.apps.googleusercontent.com';
+const API_KEY   = 'AQ.Ab8RN6KCDvZp4GEywFTH09wiqTtH800CRWXsNk0gSKbnnZzWQA';
+const FOLDER_ID = '1EwdaBNjfhQp4X-4tCuEdxOOYg_DM2WEj';
+const SCOPES    = 'https://www.googleapis.com/auth/drive.file';
+
+let gapiReady = false;
+
+/* --- Initialize Google API client properly --- */
+function initGapi(){
+  gapi.load('client:auth2', async () => {
+    try {
+      await gapi.client.init({
+        apiKey: API_KEY,
+        clientId: CLIENT_ID,
+        discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"],
+        scope: SCOPES
+      });
+      gapiReady = true;
+      console.log("✅ GAPI initialized and ready");
+    } catch (e) {
+      console.error("❌ GAPI init error", e);
+      alert("❌ Google API initialization failed. Check console.");
+    }
+  });
+}
+initGapi();
+/* --- Ensure user is signed in --- */
+async function ensureSignedIn(){
+  if(!gapiReady){
+    throw new Error("Google API not initialized yet. Wait a few seconds and try again.");
+  }
+  const auth = gapi.auth2.getAuthInstance();
+  if(!auth){ throw new Error("Google Auth not initialized properly"); }
+  if(!auth.isSignedIn.get()){ await auth.signIn(); }
+  return auth.currentUser.get().getAuthResponse(true).access_token;
+}
+
+// Helper that waits until gapiReady === true
+async function waitForGapiReady() {
+  let retries = 0;
+  while(!gapiReady && retries < 20) {  // wait up to ~10 s
+    await new Promise(r => setTimeout(r, 500));
+    retries++;
+  }
+  if(!gapiReady) throw new Error("Google API still not ready after waiting");
+}
+
+// Wrap both buttons so they wait automatically
+document.getElementById("backupBtn").addEventListener("click", async () => {
+  try {
+    await waitForGapiReady();
+    await uploadBackupToDrive();
+  } catch (e) {
+    alert("❌ " + e.message);
+  }
+});
+
+document.getElementById("restoreBtn").addEventListener("click", async () => {
+  try {
+    await waitForGapiReady();
+    await autoRestoreFromDrive();
+  } catch (e) {
+    alert("❌ " + e.message);
+  }
+});
+
+
+/* --- Backup all localStorage to Drive --- */
+async function uploadBackupToDrive(){
+  try {
+    const accessToken = await ensureSignedIn();
+    const allData = {};
+    for(let i=0;i<localStorage.length;i++){
+      const k = localStorage.key(i);
+      allData[k] = localStorage.getItem(k);
+    }
+    const blob = new Blob([JSON.stringify(allData,null,2)],{type:"application/json"});
+    const metadata = {name:"backup_"+new Date().toISOString().split("T")[0]+".json",parents:[FOLDER_ID]};
+    const form = new FormData();
+    form.append("metadata", new Blob([JSON.stringify(metadata)],{type:"application/json"}));
+    form.append("file", blob);
+
+    const res = await fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id",{
+      method:"POST",
+      headers:{Authorization:"Bearer "+accessToken},
+      body:form
+    });
+    const data = await res.json();
+    alert("✅ Backup सफलतापूर्वक Drive मा Save भयो!");
+    console.log("Uploaded:",data);
+  } catch(e) {
+    console.error("Backup error:", e);
+    alert("❌ Backup असफल: " + e.message);
+  }
+}
+
+/* --- Auto restore from most recent backup --- */
+async function autoRestoreFromDrive(){
+  try {
+    const accessToken = await ensureSignedIn();
+    const q = encodeURIComponent(`'${FOLDER_ID}' in parents and name contains 'backup_' and mimeType='application/json'`);
+    const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&orderBy=createdTime desc&pageSize=1&fields=files(id,name)`,
+      {headers:{Authorization:"Bearer "+accessToken}});
+    const json = await res.json();
+    if(!json.files || json.files.length===0){
+      alert("❌ कुनै Backup फाइल भेटिएन");
+      return;
+    }
+    const fileId = json.files[0].id;
+    const fileRes = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
+      {headers:{Authorization:"Bearer "+accessToken}});
+    const backupData = await fileRes.json();
+
+    for(const [k,v] of Object.entries(backupData)){
+      try {
+        const existing = localStorage.getItem(k);
+        if(existing){
+          let oldVal, newVal;
+          try{oldVal=JSON.parse(existing);}catch{oldVal=existing;}
+          try{newVal=JSON.parse(v);}catch{newVal=v;}
+          if(Array.isArray(oldVal)&&Array.isArray(newVal)){
+            const ids = new Set(oldVal.map(e=>e.id));
+            const merged = [...oldVal,...newVal.filter(e=>!ids.has(e.id))];
+            localStorage.setItem(k,JSON.stringify(merged));
+          } else if(typeof oldVal==='object'&&typeof newVal==='object'){
+            localStorage.setItem(k,JSON.stringify({...oldVal,...newVal}));
+          } else {
+            localStorage.setItem(k,JSON.stringify(newVal));
+          }
+        } else {
+          localStorage.setItem(k,v);
+        }
+      } catch(err){
+        console.warn("Restore merge failed",k,err);
+      }
+    }
+    alert("🔁 Restore पूरा भयो (latest backup बाट)!");
+  } catch(e){
+    console.error("Restore error:", e);
+    alert("❌ Restore असफल: " + e.message);
+  }
+}
+
+/* --- Button listeners --- */
+document.getElementById("backupBtn").addEventListener("click", uploadBackupToDrive);
+document.getElementById("restoreBtn").addEventListener("click", autoRestoreFromDrive);
+</script>
+<!-- === End Google Drive Backup + Auto-Restore === -->
+
+<!-- === Google Drive Backup + Auto-Restore (stable version) === -->
+<script src="https://apis.google.com/js/api.js"></script>
+<script>
+const CLIENT_ID='43860508611-ki9ekbtvguadckha02e7mbclmf6kth8d.apps.googleusercontent.com';
+const API_KEY='AQ.Ab8RN6KCDvZp4GEywFTH09wiqTtH800CRWXsNk0gSKbnnZzWQA';
+const FOLDER_ID='1EwdaBNjfhQp4X-4tCuEdxOOYg_DM2WEj';
+const SCOPES='https://www.googleapis.com/auth/drive.file';
+
+let gapiReady=false;
+
+/* --- initialize and mark ready --- */
+function initGapi(){
+  return new Promise(resolve=>{
+    gapi.load('client:auth2', async ()=>{
+      try{
+        await gapi.client.init({
+          apiKey:API_KEY,
+          clientId:CLIENT_ID,
+          discoveryDocs:["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"],
+          scope:SCOPES
+        });
+        gapiReady=true;
+        console.log("✅ Google API initialized");
+        resolve();
+      }catch(e){console.error("❌ GAPI init error",e);}
+    });
+  });
+}
+window.addEventListener("load",initGapi);
+
+/* --- ensure sign-in --- */
+async function ensureSignedIn(){
+  if(!gapiReady) throw new Error("Google API not ready yet.");
+  const auth=gapi.auth2.getAuthInstance();
+  if(!auth) throw new Error("Auth instance missing.");
+  if(!auth.isSignedIn.get()) await auth.signIn();
+  return auth.currentUser.get().getAuthResponse(true).access_token;
+}
+
+/* --- backup --- */
+async function uploadBackupToDrive(){
+  try{
+    const accessToken=await ensureSignedIn();
+    const allData={};
+    for(let i=0;i<localStorage.length;i++){
+      const k=localStorage.key(i);allData[k]=localStorage.getItem(k);
+    }
+    const blob=new Blob([JSON.stringify(allData,null,2)],{type:"application/json"});
+    const metadata={name:"backup_"+new Date().toISOString().split("T")[0]+".json",parents:[FOLDER_ID]};
+    const form=new FormData();
+    form.append("metadata",new Blob([JSON.stringify(metadata)],{type:"application/json"}));
+    form.append("file",blob);
+    const res=await fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id",{
+      method:"POST",headers:{Authorization:"Bearer "+accessToken},body:form});
+    const data=await res.json();
+    alert("✅ Backup सफलतापूर्वक Drive मा Save भयो!");
+    console.log("Uploaded:",data);
+  }catch(e){
+    console.error("Backup error",e);
+    alert("❌ Backup असफल: "+e.message);
+  }
+}
+
+/* --- restore --- */
+async function autoRestoreFromDrive(){
+  try{
+    const accessToken=await ensureSignedIn();
+    const q=encodeURIComponent(`'${FOLDER_ID}' in parents and name contains 'backup_' and mimeType='application/json'`);
+    const res=await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&orderBy=createdTime desc&pageSize=1&fields=files(id,name)`,
+      {headers:{Authorization:"Bearer "+accessToken}});
+    const json=await res.json();
+    if(!json.files||json.files.length===0){alert("❌ कुनै Backup फाइल भेटिएन");return;}
+    const fileId=json.files[0].id;
+    const fileRes=await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
+      {headers:{Authorization:"Bearer "+accessToken}});
+    const backupData=await fileRes.json();
+    for(const [k,v] of Object.entries(backupData)){
+      try{
+        const existing=localStorage.getItem(k);
+        if(existing){
+          let oldVal,newVal;
+          try{oldVal=JSON.parse(existing);}catch{oldVal=existing;}
+          try{newVal=JSON.parse(v);}catch{newVal=v;}
+          if(Array.isArray(oldVal)&&Array.isArray(newVal)){
+            const ids=new Set(oldVal.map(e=>e.id));
+            const merged=[...oldVal,...newVal.filter(e=>!ids.has(e.id))];
+            localStorage.setItem(k,JSON.stringify(merged));
+          }else if(typeof oldVal==='object'&&typeof newVal==='object'){
+            localStorage.setItem(k,JSON.stringify({...oldVal,...newVal}));
+          }else{
+            localStorage.setItem(k,JSON.stringify(newVal));
+          }
+        }else{localStorage.setItem(k,v);}
+      }catch(err){console.warn("Merge failed",k,err);}
+    }
+    alert("🔁 Restore पूरा भयो (latest backup बाट)!");
+  }catch(e){
+    console.error("Restore error",e);
+    alert("❌ Restore असफल: "+e.message);
+  }
+}
+
+/* --- buttons wait for ready --- */
+async function waitForReady(){
+  let t=0;
+  while(!gapiReady&&t<20){await new Promise(r=>setTimeout(r,500));t++;}
+  if(!gapiReady) throw new Error("Google API never loaded.");
+}
+document.getElementById("backupBtn").addEventListener("click",async()=>{
+  await waitForReady();await uploadBackupToDrive();
+});
+document.getElementById("restoreBtn").addEventListener("click",async()=>{
+  await waitForReady();await autoRestoreFromDrive();
+});
+</script>
+<!-- === End Google Drive Backup + Auto-Restore === -->
+
+
+</body>
+</html>

@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Bank Statement Download</title>
+<style>
+  body{font-family:Segoe UI,Arial,sans-serif;background:#f6f9fc;margin:0;padding:18px;color:#123;}
+  .card{background:#fff;padding:18px;border-radius:10px;box-shadow:0 6px 18px rgba(10,30,60,0.06);max-width:1100px;margin:auto;}
+  h1{color:#075985;margin-bottom:6px}
+  .controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+  button{padding:8px 12px;border-radius:6px;border:1px solid #cbd5e1;background:#fff;cursor:pointer}
+  table{width:100%;border-collapse:collapse;margin-top:12px}
+  th,td{padding:8px;border:1px solid #e6eef6;text-align:left;font-size:14px}
+  th{background:#eef6ff;color:#064e3b}
+  .right{text-align:right}
+  .small{font-size:13px;color:#666}
+  .filters{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  input[type=date],input[type=text]{padding:6px;border:1px solid #cbd5e1;border-radius:6px}
+  @media print{button{display:none}.controls{display:none}}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Bank Statement Download</h1>
+  <div class="small">Report is loaded from local browser storage key: <code>bank_statement_html_v2</code></div>
+
+  <div class="controls">
+    <div class="filters">
+      <label>From <input id="fromDate" type="date"></label>
+      <label>To <input id="toDate" type="date"></label>
+      <label>Bank <input id="bankFilter" type="text" placeholder="leave blank for all"></label>
+      <button id="apply">Apply Filter</button>
+      <button id="clear">Clear</button>
+    </div>
+    <div style="margin-left:auto;display:flex;gap:8px">
+      <button id="exportCSV">Export CSV</button>
+      <button id="exportXLS">Export Excel (.xls)</button>
+      <button id="exportPDF">Export PDF</button>
+      <button id="printBtn">Print</button>
+    </div>
+  </div>
+
+  <div id="summary" class="small"></div>
+
+  <div style="overflow:auto;max-height:540px">
+    <table id="tbl">
+      <thead>
+        <tr><th>Bank</th><th>Date</th><th class="right">Opening</th><th class="right">Txn (type)</th><th class="right">Closing</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+function fmt(n){return Number(n||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});}
+function load(){try{return JSON.parse(localStorage.getItem('bank_statement_html_v2')||'[]')}catch(e){return []}}
+function render(list){
+  const tbody=document.querySelector('#tbl tbody'); tbody.innerHTML='';
+  if(!list.length){tbody.innerHTML='<tr><td colspan=5 style="text-align:center;padding:18px;color:#666">No records found.</td></tr>'; return;}
+  let totalOpen=0,totalTxn=0,totalClose=0;
+  list.sort((a,b)=> (a.date < b.date?1:-1));
+  for(const r of list){
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${r.bankName||''}</td>
+      <td>${r.date||''}</td>
+      <td class="right">${fmt(r.openingBalance)}</td>
+      <td class="right">${fmt(r.todaysTransaction)} (${r.txnType||''})</td>
+      <td class="right">${fmt(r.closingBalance)}</td>`;
+    tbody.appendChild(tr);
+    totalOpen+=Number(r.openingBalance||0); totalTxn+=Number(r.todaysTransaction||0); totalClose+=Number(r.closingBalance||0);
+  }
+  document.getElementById('summary').textContent = `Records: ${list.length} — Opening Total: ${fmt(totalOpen)} | Txn Total: ${fmt(totalTxn)} | Closing Total: ${fmt(totalClose)}`;
+}
+
+function applyFilter(){
+  const from=document.getElementById('fromDate').value;
+  const to=document.getElementById('toDate').value;
+  const bank=document.getElementById('bankFilter').value.trim().toLowerCase();
+  let list=load();
+  if(from) list = list.filter(r=>r.date>=from);
+  if(to) list = list.filter(r=>r.date<=to);
+  if(bank) list = list.filter(r=>(r.bankName||'').toLowerCase().includes(bank));
+  render(list);
+  return list;
+}
+
+document.getElementById('apply').addEventListener('click',()=>applyFilter());
+document.getElementById('clear').addEventListener('click',()=>{document.getElementById('fromDate').value='';document.getElementById('toDate').value='';document.getElementById('bankFilter').value='';render(load());});
+
+// CSV/XLS export helpers
+function exportCSV(list){
+  if(!list.length){alert('No data');return;}
+  const header=['Bank','Date','Opening','Txn','TxnType','Closing'];
+  const rows=list.map(r=>[r.bankName,r.date,r.openingBalance,r.todaysTransaction,r.txnType,r.closingBalance]);
+  const csv=[header.join(','),...rows.map(r=>r.map(c=>`"${String(c||'').replace(/"/g,'""')}"`).join(','))].join('\\n');
+  const blob=new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='bank_statements.csv'; a.click(); URL.revokeObjectURL(url);
+}
+function exportXLS(list){
+  if(!list.length){alert('No data');return;}
+  let html='<table border=1><tr><th>Bank</th><th>Date</th><th>Opening</th><th>Txn</th><th>TxnType</th><th>Closing</th></tr>';
+  list.forEach(r=>{html+=`<tr><td>${r.bankName}</td><td>${r.date}</td><td>${r.openingBalance}</td><td>${r.todaysTransaction}</td><td>${r.txnType}</td><td>${r.closingBalance}</td></tr>`});
+  html+='</table>';
+  const blob=new Blob([html],{type:'application/vnd.ms-excel'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='bank_statements.xls'; a.click(); URL.revokeObjectURL(url);
+}
+
+document.getElementById('exportCSV').addEventListener('click',()=>exportCSV(applyFilter()));
+document.getElementById('exportXLS').addEventListener('click',()=>exportXLS(applyFilter()));
+document.getElementById('printBtn').addEventListener('click',()=>window.print());
+
+document.getElementById('exportPDF').addEventListener('click',()=>{
+  const { jsPDF } = window.jspdf; const doc = new jsPDF('p','pt','a4'); doc.setFontSize(14); doc.text('Bank Statement Report',40,40);
+  const list = applyFilter(); let y=70;
+  doc.setFontSize(10);
+  list.forEach(r=>{
+    doc.text(`${r.date} — ${r.bankName} — Opening: ${Number(r.openingBalance||0).toFixed(2)} Txn: ${Number(r.todaysTransaction||0).toFixed(2)} Closing: ${Number(r.closingBalance||0).toFixed(2)}`,40,y);
+    y+=18; if(y>740){doc.addPage(); y=40;}
+  });
+  doc.save('bank_statements.pdf');
+});
+
+// initial render
+render(load());
+</script>
+</body>
+</html>

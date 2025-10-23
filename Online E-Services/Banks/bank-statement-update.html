@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Bank Statement Manager — HTML</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .fade-in { animation: fadeIn 220ms ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px);} to { opacity: 1; transform: translateY(0);} }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace; }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen antialiased">
+  <div class="max-w-5xl mx-auto p-6">
+    <header class="mb-6">
+      <h1 class="text-3xl font-bold text-sky-700">Bank Statement Manager</h1>
+      <p class="text-sm text-gray-600">Fixed banks, daily ledger. Opening balance auto-rolls from last saved closing.</p>
+    </header>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- form -->
+      <section class="lg:col-span-2 bg-white p-6 rounded-2xl shadow">
+        <form id="recordForm" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+          <div>
+            <label class="block text-xs text-gray-600">Bank</label>
+            <select id="bankSelect" class="mt-1 w-full p-2 border rounded">
+              <option>Esewa</option>
+              <option>NCBL</option>
+              <option>Sunrise Bank</option>
+              <option>Nefscun</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs text-gray-600">Date</label>
+            <input id="dateInput" type="date" class="mt-1 w-full p-2 border rounded" />
+          </div>
+
+          <div>
+            <label class="block text-xs text-gray-600">Opening Balance</label>
+            <input id="openingInput" type="number" step="0.01" class="mt-1 w-full p-2 border rounded text-right mono" />
+            <div class="text-xs text-gray-400 mt-1">Auto-loaded from last saved closing</div>
+          </div>
+
+          <div>
+            <label class="block text-xs text-gray-600">Today's Transaction</label>
+            <div class="flex items-center space-x-2 mt-1">
+              <label class="flex items-center space-x-1">
+                <input type="radio" name="txnType" value="receipt" id="receiptRadio" checked />
+                <span class="text-xs">Receipt</span>
+              </label>
+              <label class="flex items-center space-x-1">
+                <input type="radio" name="txnType" value="payment" id="paymentRadio" />
+                <span class="text-xs">Payment</span>
+              </label>
+            </div>
+            <input id="txnInput" type="number" step="0.01" class="mt-1 w-full p-2 border rounded text-right mono" />
+          </div>
+
+          <div class="md:col-span-4 flex items-center justify-between mt-2">
+            <div>
+              <div class="text-xs text-gray-600">Closing (auto)</div>
+              <div id="closingView" class="text-2xl font-semibold mono">0.00</div>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <button id="saveBtn" class="px-4 py-2 bg-sky-600 text-white rounded hover:bg-sky-700">Save / Update</button>
+              <button id="clearBtn" type="button" class="px-4 py-2 border rounded">Clear</button>
+              <label class="inline-block px-3 py-2 border rounded cursor-pointer text-sm">
+                Import JSON
+                <input id="importFile" type="file" accept="application/json" class="hidden" />
+              </label>
+            </div>
+          </div>
+        </form>
+      </section>
+
+      <!-- side panel -->
+      <aside class="bg-white p-6 rounded-2xl shadow">
+        <div class="mb-4">
+          <label class="block text-xs text-gray-600">Search (bank or date)</label>
+          <input id="searchInput" placeholder="e.g., Esewa or 2025-10-01" class="mt-1 w-full p-2 border rounded" />
+        </div>
+
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <div class="text-sm text-gray-600">Records</div>
+            <div id="countBadge" class="text-sm mono">0</div>
+          </div>
+
+          <div class="flex gap-2">
+            <button id="exportCSV" class="flex-1 px-3 py-2 border rounded text-sm">Export CSV</button>
+            <button id="exportPDF" class="flex-1 px-3 py-2 border rounded text-sm">Export PDF</button>
+          </div>
+
+          <div class="pt-3 text-xs text-gray-500">Tip: Save daily to keep automatic rollovers.</div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- records table -->
+    <section class="mt-6 bg-white p-4 rounded-2xl shadow">
+      <div class="overflow-x-auto">
+        <table id="recordsTable" class="w-full table-auto">
+          <thead>
+            <tr class="text-left text-sm text-gray-500 border-b">
+              <th class="p-3">Bank</th>
+              <th class="p-3">Date</th>
+              <th class="p-3 text-right">Opening</th>
+              <th class="p-3 text-right">Txn</th>
+              <th class="p-3 text-right">Closing</th>
+              <th class="p-3">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="recordsBody">
+            <tr><td colspan="6" class="p-4 text-center text-gray-500">No records yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer class="mt-6 text-sm text-gray-500 text-center">Data stored locally in this browser only. Export for backup.</footer>
+  </div>
+
+  <!-- toast -->
+  <div id="toast" class="fixed right-6 bottom-6 bg-sky-600 text-white px-4 py-2 rounded-lg shadow hidden"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+(function(){
+  const STORAGE_KEY = 'bank_statement_html_v2';
+  const bankSelect = document.getElementById('bankSelect');
+  const dateInput = document.getElementById('dateInput');
+  const openingInput = document.getElementById('openingInput');
+  const txnInput = document.getElementById('txnInput');
+  const closingView = document.getElementById('closingView');
+  const saveBtn = document.getElementById('saveBtn');
+  const clearBtn = document.getElementById('clearBtn');
+  const importFile = document.getElementById('importFile');
+  const exportPDFBtn = document.getElementById('exportPDF');
+  const recordsBody = document.getElementById('recordsBody');
+  const countBadge = document.getElementById('countBadge');
+  const searchInput = document.getElementById('searchInput');
+  const toastEl = document.getElementById('toast');
+
+  const receiptRadio = document.getElementById('receiptRadio');
+  const paymentRadio = document.getElementById('paymentRadio');
+
+  let records = [];
+
+  function showToast(msg, ms=2500){
+    toastEl.textContent = msg;
+    toastEl.classList.remove('hidden');
+    toastEl.classList.add('fade-in');
+    setTimeout(()=> toastEl.classList.add('hidden'), ms);
+  }
+
+  function loadRecords(){
+    const raw = localStorage.getItem(STORAGE_KEY);
+    records = raw ? JSON.parse(raw) : [];
+  }
+
+  function saveRecords(){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+    countBadge.textContent = records.length;
+  }
+
+  function getRecordId(bank, date){
+    return bank + '||' + date;
+  }
+
+  function getLastClosingFor(bank, isoDate){
+    const filtered = records.filter(r => r.bankName === bank && r.date <= isoDate);
+    if (!filtered.length) return 0;
+    filtered.sort((a,b) => b.date.localeCompare(a.date));
+    return Number(filtered[0].closingBalance) || 0;
+  }
+
+  function formatMoney(n){
+    return (Number(n)||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+  }
+
+  function updateClosingView(){
+    const ob = Number(openingInput.value) || 0;
+    const tt = Number(txnInput.value) || 0;
+    const type = receiptRadio.checked ? 'receipt' : 'payment';
+    const cb = type === 'receipt' ? ob + tt : ob - tt;
+    closingView.textContent = formatMoney(cb);
+    return cb;
+  }
+
+  function refreshFormDefaults(){
+    const bank = bankSelect.value;
+    const date = dateInput.value || todayISO();
+    const last = getLastClosingFor(bank, date);
+    openingInput.value = last;
+    txnInput.value = 0;
+    updateClosingView();
+  }
+
+  function renderRecords(filterText=''){
+    const tbody = recordsBody;
+    tbody.innerHTML = '';
+    let list = records;
+    if (filterText){
+      const ft = filterText.toLowerCase();
+      list = list.filter(r => (r.bankName + ' ' + r.date).toLowerCase().includes(ft));
+    }
+    list.sort((a,b) => b.date.localeCompare(a.date) || a.bankName.localeCompare(b.bankName));
+    if (!list.length){
+      tbody.innerHTML = '<tr><td colspan=\"6\" class=\"p-4 text-center text-gray-500\">No records found.</td></tr>';
+      return;
+    }
+    for (const r of list){
+      const tr = document.createElement('tr');
+      tr.className = 'border-b hover:bg-gray-50';
+      tr.innerHTML = `
+        <td class=\"p-3 font-medium text-sky-700\">${r.bankName}</td>
+        <td class=\"p-3 text-sm text-gray-600\">${r.date}</td>
+        <td class=\"p-3 text-right mono\">${formatMoney(r.openingBalance)}</td>
+        <td class=\"p-3 text-right mono\">${formatMoney(r.todaysTransaction)} (${r.txnType})</td>
+        <td class=\"p-3 text-right mono font-semibold\">${formatMoney(r.closingBalance)}</td>
+        <td class=\"p-3\"><button data-id=\"${r.id}\" class=\"delBtn px-3 py-1 border rounded text-sm text-red-600\">Delete</button></td>`;
+      tbody.appendChild(tr);
+    }
+    tbody.querySelectorAll('.delBtn').forEach(btn => btn.addEventListener('click', onDelete));
+  }
+
+  function onDelete(e){
+    const id = e.currentTarget.dataset.id;
+    if (!confirm('Delete this record permanently?')) return;
+    records = records.filter(r => r.id !== id);
+    saveRecords();
+    renderRecords(searchInput.value.trim());
+    showToast('Deleted');
+  }
+
+  function onSave(e){
+    e.preventDefault();
+    const bank = bankSelect.value;
+    const date = dateInput.value || todayISO();
+    const ob = Number(openingInput.value) || 0;
+    const tt = Number(txnInput.value) || 0;
+    const txnType = receiptRadio.checked ? 'receipt' : 'payment';
+    const cb = txnType === 'receipt' ? ob + tt : ob - tt;
+    const id = getRecordId(bank, date);
+    const createdAt = new Date().toISOString();
+
+    const newRec = { id, bankName: bank, date, openingBalance: ob, todaysTransaction: tt, txnType, closingBalance: cb, createdAt };
+    records = records.filter(r => r.id !== id);
+    records.push(newRec);
+    saveRecords();
+    renderRecords(searchInput.value.trim());
+    showToast('Saved');
+  }
+
+  function onClear(){
+    txnInput.value = '';
+    updateClosingView();
+  }
+
+  function onExportPDF(){
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.setFontSize(16);
+    doc.text('Bank Statement Records', 14, 15);
+    doc.setFontSize(11);
+    let y = 30;
+    records.forEach(r => {
+      doc.text(`Bank: ${r.bankName}`, 14, y);
+      doc.text(`Date: ${r.date}`, 14, y+6);
+      doc.text(`Opening: ${r.openingBalance.toFixed(2)} | ${r.txnType === 'receipt' ? 'Receipt' : 'Payment'}: ${r.todaysTransaction.toFixed(2)} | Closing: ${r.closingBalance.toFixed(2)}`, 14, y+12);
+      y += 22;
+      if (y > 270) { doc.addPage(); y = 20; }
+    });
+    doc.save('Bank_Statement.pdf');
+  }
+
+  function todayISO(){ return new Date().toISOString().slice(0,10); }
+
+  function init(){
+    dateInput.value = todayISO();
+    loadRecords();
+    saveRecords();
+    refreshFormDefaults();
+    renderRecords();
+
+    bankSelect.addEventListener('change', refreshFormDefaults);
+    dateInput.addEventListener('change', refreshFormDefaults);
+    txnInput.addEventListener('input', updateClosingView);
+    openingInput.addEventListener('input', updateClosingView);
+    receiptRadio.addEventListener('change', updateClosingView);
+    paymentRadio.addEventListener('change', updateClosingView);
+    saveBtn.addEventListener('click', onSave);
+    clearBtn.addEventListener('click', onClear);
+    exportPDFBtn.addEventListener('click', onExportPDF);
+    searchInput.addEventListener('input', e => renderRecords(e.target.value));
+
+    countBadge.textContent = records.length;
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
