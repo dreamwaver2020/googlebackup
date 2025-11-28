@@ -1,98 +1,229 @@
-<!doctype html>
-<html lang="en">
-<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Collector Download</title>
+<!DOCTYPE html>
+<html lang="ne">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Foot Fails — Records Viewer</title>
+
 <style>
-  body{font-family:Segoe UI,Arial;color:#123;background:#f7fbfc;padding:16px}
-  .card{max-width:1100px;margin:auto;background:#fff;padding:16px;border-radius:10px;box-shadow:0 6px 18px rgba(10,30,60,0.06)}
-  h1{color:#0f766e}
-  .controls{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
-  select,input{padding:6px;border:1px solid #cbd5e1;border-radius:6px}
-  table{width:100%;border-collapse:collapse}
-  th,td{padding:8px;border:1px solid #e6eef6;text-align:left}
-  th{background:#e6fffa;color:#064e3b}
-  .right{text-align:right}
-  button{padding:8px 10px;border-radius:6px;border:1px solid #cbd5e1;background:#fff;cursor:pointer}
-  @media print{button{display:none}}
-</style></head><body>
+  body{
+    font-family: Arial;
+    background:#f3f6ff;
+    margin:0;
+    padding:12px;
+  }
+  .card{
+    background:white;
+    padding:14px;
+    border-radius:10px;
+    box-shadow:0 4px 15px rgba(0,0,0,0.1);
+    max-width:960px;
+    margin:auto;
+  }
+  table{
+    width:100%;
+    border-collapse:collapse;
+  }
+  th, td{
+    border:1px solid #e5e9ff;
+    padding:8px;
+    font-size:14px;
+  }
+  th{
+    background:#eaf3ff;
+  }
+  .pager{
+    display:flex;
+    justify-content:center;
+    gap:12px;
+    margin-top:14px;
+  }
+  .btn{
+    padding:7px 12px;
+    border:none;
+    border-radius:6px;
+    background:#007bff;
+    color:white;
+    cursor:pointer;
+    font-size:14px;
+  }
+  .btn.secondary{
+    background:#6c757d;
+  }
+  .btn:disabled{
+    background:#9bbcff;
+  }
+</style>
+</head>
+
+<body>
+
 <div class="card">
-  <h1>Collector Download (Datewise Archive)</h1>
-  <div class="controls">
-    <label>Date <input id="dateSel" type="date" /></label>
-    <button id="loadBtn">Load</button>
-    <button id="showAll">Show All Dates</button>
-    <div style="margin-left:auto;display:flex;gap:8px">
-      <button id="exportCSV">Export CSV</button>
-      <button id="exportXLS">Export Excel (.xls)</button>
-      <button id="exportPDF">Export PDF</button>
-      <button id="printBtn">Print</button>
-    </div>
+
+  <h2 style="text-align:center;margin-top:0;">Foot Fails / Inquiry — Saved Records</h2>
+
+  <!-- Search + Export Buttons -->
+  <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
+      <input id="search" type="text" placeholder="Search Name / Phone"
+            style="padding:8px;width:220px;">
+      <div>
+        <button id="csvBtn" class="btn">Export CSV</button>
+        <button id="pdfBtn" class="btn secondary">Export PDF</button>
+      </div>
   </div>
 
-  <div id="info" class="small"></div>
+  <!-- Table -->
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Name</th>
+        <th>Address</th>
+        <th>Phone</th>
+        <th>Exchange</th>
+        <th>Type</th>
+        <th>Status</th>
+        <th>Remarks</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
 
-  <div style="overflow:auto;max-height:540px">
-    <table id="tbl">
-      <thead><tr><th>#</th><th>Particulars</th><th class="right">Total</th><th class="right">Total Received</th><th class="right">Difference</th><th>Status</th></tr></thead>
-      <tbody></tbody>
-    </table>
+  <!-- Pagination -->
+  <div class="pager">
+    <button id="prevBtn" class="btn">Prev</button>
+    <span id="info">Page 1</span>
+    <button id="nextBtn" class="btn">Next</button>
   </div>
+
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-function loadHistory(){try{return JSON.parse(localStorage.getItem('collectorHistory_v1')||'{}')}catch(e){return {}}}
-function renderForDate(date){
-  const history = loadHistory();
-  const tbody=document.querySelector('#tbl tbody'); tbody.innerHTML='';
-  if(!history[date]){tbody.innerHTML='<tr><td colspan=6 style="text-align:center;padding:18px;color:#666">No data for selected date.</td></tr>'; document.getElementById('info').textContent=''; return [];}
-  const arr=history[date];
-  arr.forEach((r,i)=>{
-    const tr=document.createElement('tr');
-    tr.innerHTML=`<td>${i+1}</td><td>${r.name}</td><td class="right">${r.total}</td><td class="right">${r.totalReceived}</td><td class="right">${r.difference}</td><td>${r.status}</td>`;
-    tbody.appendChild(tr);
-  });
-  document.getElementById('info').textContent=`Records for ${date}: ${arr.length}`;
+const KEY = "foot_fails_records";
+let perPage = 10;
+let currentPage = 1;
+
+/* ---- Convert Date Safely ---- */
+function safeDate(d){
+  let t = new Date(d);
+  return isNaN(t.getTime()) ? new Date(0) : t;
+}
+
+/* ---- Fetch descending by DATE ---- */
+function getData(){
+  let arr = JSON.parse(localStorage.getItem(KEY) || "[]");
+
+  arr.sort((a,b)=> safeDate(b.date) - safeDate(a.date)); // DESCENDING DATE
+
   return arr;
 }
 
-document.getElementById('loadBtn').addEventListener('click',()=>{
-  const d=document.getElementById('dateSel').value; if(!d){alert('Please select a date');return;} renderForDate(d);
-});
-document.getElementById('showAll').addEventListener('click',()=>{
-  const history=loadHistory(); const tbody=document.querySelector('#tbl tbody'); tbody.innerHTML='';
-  const keys=Object.keys(history).sort((a,b)=>b.localeCompare(a));
-  if(!keys.length){tbody.innerHTML='<tr><td colspan=6 style="text-align:center;padding:18px;color:#666">No history saved yet.</td></tr>'; return;}
-  let count=0;
-  keys.forEach(date=>{ const arr=history[date]; arr.forEach((r,i)=>{count++; const tr=document.createElement('tr'); tr.innerHTML=`<td>${count}</td><td>${r.name} <small style="color:#666">(${date})</small></td><td class="right">${r.total}</td><td class="right">${r.totalReceived}</td><td class="right">${r.difference}</td><td>${r.status}</td>`; tbody.appendChild(tr); }); });
-  document.getElementById('info').textContent=`Showing all dates — total rows: ${count}`;
-});
+function render(){
+  let q = document.getElementById("search").value.toLowerCase();
+  let all = getData().filter(r =>
+    (r.name || "").toLowerCase().includes(q) ||
+    (r.phone || "").includes(q)
+  );
 
-function exportCSV(arr,date){
-  if(!arr||!arr.length){alert('No data');return;}
-  const header=['#','Name','Total','TotalReceived','Difference','Status','Date'];
-  const rows=arr.map((r,i)=>[i+1,r.name,r.total,r.totalReceived,r.difference,r.status,date||'']);
-  const csv=[header.join(','),...rows.map(r=>r.map(c=>`"${String(c||'').replace(/"/g,'""')}"`).join(','))].join('\\n');
-  const blob=new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='collector_'+(date||'all')+'.csv'; a.click(); URL.revokeObjectURL(url);
+  let total = all.length;
+  let totalPages = Math.max(1, Math.ceil(total/perPage));
+  if(currentPage > totalPages) currentPage = totalPages;
+
+  let page = all.slice((currentPage-1)*perPage, currentPage*perPage);
+  let tb = document.getElementById("tbody");
+  tb.innerHTML = "";
+
+  page.forEach(r=>{
+    tb.innerHTML += `
+      <tr>
+        <td>${r.date || ""}</td>
+        <td>${r.name}</td>
+        <td>${r.address}</td>
+        <td>${r.phone}</td>
+        <td>${r.exchange}</td>
+        <td>${r.ctype}</td>
+        <td>${r.status}</td>
+        <td>${r.remarks}</td>
+      </tr>
+    `;
+  });
+
+  document.getElementById("info").textContent =
+      "Page " + currentPage + " of " + totalPages;
+
+  document.getElementById("prevBtn").disabled = currentPage === 1;
+  document.getElementById("nextBtn").disabled = currentPage === totalPages;
 }
-function exportXLS(arr,date){
-  if(!arr||!arr.length){alert('No data');return;}
-  let html='<table border=1><tr><th>#</th><th>Name</th><th>Total</th><th>TotalReceived</th><th>Difference</th><th>Status</th><th>Date</th></tr>';
-  arr.forEach((r,i)=>{html+=`<tr><td>${i+1}</td><td>${r.name}</td><td>${r.total}</td><td>${r.totalReceived}</td><td>${r.difference}</td><td>${r.status}</td><td>${date||''}</td></tr>`});
-  html+='</table>'; const blob=new Blob([html],{type:'application/vnd.ms-excel'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='collector_'+(date||'all')+'.xls'; a.click(); URL.revokeObjectURL(url);
-}
 
-document.getElementById('exportCSV').addEventListener('click',()=>{
-  const d=document.getElementById('dateSel').value; if(!d){alert('Please select date or click Show All then export from table view');return;} exportCSV(renderForDate(d),d);
-});
-document.getElementById('exportXLS').addEventListener('click',()=>{
-  const d=document.getElementById('dateSel').value; if(!d){alert('Please select date or click Show All then export from table view');return;} exportXLS(renderForDate(d),d);
-});
-document.getElementById('printBtn').addEventListener('click',()=>window.print());
+document.getElementById("prevBtn").onclick = ()=>{
+  if(currentPage > 1){ currentPage--; render(); }
+};
+document.getElementById("nextBtn").onclick = ()=>{
+  currentPage++; render();
+};
+document.getElementById("search").oninput = ()=>{
+  currentPage = 1;
+  render();
+};
 
-document.getElementById('exportPDF').addEventListener('click',()=>{
-  const { jsPDF } = window.jspdf; const doc = new jsPDF('p','pt','a4'); doc.setFontSize(14); const d=document.getElementById('dateSel').value; doc.text('Collector Report '+(d||''),40,40);
-  const arr = renderForDate(d); let y=70; doc.setFontSize(10);
-  arr.forEach((r,i)=>{ doc.text(`${i+1}. ${r.name} — Total: ${r.total} Received: ${r.totalReceived} Diff: ${r.difference} Status: ${r.status}`,40,y); y+=16; if(y>740){doc.addPage(); y=40;} });
-  doc.save('collector_report_'+(d||'')+'.pdf');
-});
-</script></body></html>
+
+/* ---- CSV EXPORT ---- */
+document.getElementById("csvBtn").onclick = ()=>{
+  let arr = getData();
+  if(arr.length === 0){ alert("No data to export"); return; }
+
+  let csv = "Date,Name,Address,Phone,Exchange,Type,Status,Remarks\n";
+  arr.forEach(r=>{
+    csv += `"${r.date}","${r.name}","${r.address}","${r.phone}","${r.exchange}","${r.ctype}","${r.status}","${r.remarks}"\n`;
+  });
+
+  let blob = new Blob([csv], {type:"text/csv"});
+  let url = URL.createObjectURL(blob);
+  let a = document.createElement("a");
+  a.href = url;
+  a.download = "records.csv";
+  a.click();
+  URL.revokeObjectURL(url);
+};
+
+
+/* ---- PDF EXPORT ---- */
+document.getElementById("pdfBtn").onclick = ()=>{
+  let arr = getData();
+  if(arr.length === 0){ alert("No records"); return; }
+
+  let w = window.open("");
+  w.document.write(`
+    <html><head><title>Foot Fails PDF</title></head><body>
+    <h2>Foot Fails / Inquiry Records</h2>
+    <table border="1" style="width:100%; border-collapse:collapse;">
+      <tr>
+        <th>Date</th><th>Name</th><th>Address</th><th>Phone</th>
+        <th>Exchange</th><th>Type</th><th>Status</th><th>Remarks</th>
+      </tr>
+      ${
+        arr.map(r=>`
+          <tr>
+            <td>${r.date}</td>
+            <td>${r.name}</td>
+            <td>${r.address}</td>
+            <td>${r.phone}</td>
+            <td>${r.exchange}</td>
+            <td>${r.ctype}</td>
+            <td>${r.status}</td>
+            <td>${r.remarks}</td>
+          </tr>
+        `).join("")
+      }
+    </table>
+    </body></html>
+  `);
+  w.document.close();
+  w.print();
+};
+
+render();
+</script>
+
+</body>
+</html>
