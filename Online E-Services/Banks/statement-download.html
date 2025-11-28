@@ -1,128 +1,328 @@
 <!doctype html>
-<html lang="en">
+<html lang="ne">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Bank Statement Download</title>
-<style>
-  body{font-family:Segoe UI,Arial,sans-serif;background:#f6f9fc;margin:0;padding:18px;color:#123;}
-  .card{background:#fff;padding:18px;border-radius:10px;box-shadow:0 6px 18px rgba(10,30,60,0.06);max-width:1100px;margin:auto;}
-  h1{color:#075985;margin-bottom:6px}
-  .controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
-  button{padding:8px 12px;border-radius:6px;border:1px solid #cbd5e1;background:#fff;cursor:pointer}
-  table{width:100%;border-collapse:collapse;margin-top:12px}
-  th,td{padding:8px;border:1px solid #e6eef6;text-align:left;font-size:14px}
-  th{background:#eef6ff;color:#064e3b}
-  .right{text-align:right}
-  .small{font-size:13px;color:#666}
-  .filters{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  input[type=date],input[type=text]{padding:6px;border:1px solid #cbd5e1;border-radius:6px}
-  @media print{button{display:none}.controls{display:none}}
-</style>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Summary Statement — Records Overview</title>
+  <style>
+    :root{
+      --primary:#0d6efd; --card:#fff; --muted:#f7fbff; --shadow:rgba(0,0,0,0.06);
+    }
+    body{font-family:Inter,Arial,Helvetica,sans-serif;background:linear-gradient(180deg,#f4fbff,#ffffff);margin:0;padding:18px;}
+    .wrap{max-width:1100px;margin:12px auto;}
+    .card{background:var(--card);border-radius:10px;box-shadow:0 6px 20px var(--shadow);padding:14px;margin-bottom:12px;}
+    h1{font-size:20px;margin:0 0 6px;color:#023047;}
+    .stats{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;}
+    .stat{flex:1;min-width:160px;padding:12px;border-radius:8px;background:var(--muted);font-weight:700;}
+    table{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px;}
+    th,td{padding:8px;border:1px solid #e6eef9;text-align:left;}
+    th{background:#eaf6ff;font-weight:700;}
+    .controls{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap;}
+    .btn{background:var(--primary);color:#fff;padding:8px 10px;border:0;border-radius:8px;cursor:pointer;font-weight:700;}
+    .btn.secondary{background:#6c757d;}
+    .muted{color:#555;font-size:13px;}
+    .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:space-between;}
+    .small{font-size:13px;color:#444;}
+    .no-data{padding:22px;text-align:center;color:#666;}
+    .filter{display:flex;gap:8px;align-items:center;}
+    input[type="search"], select{padding:8px;border-radius:8px;border:1px solid #d6e6f7;}
+  </style>
 </head>
 <body>
-<div class="card">
-  <h1>Bank Statement Download</h1>
-  <div class="small">Report is loaded from local browser storage key: <code>bank_statement_html_v2</code></div>
+  <div class="wrap">
+    <div class="card">
+      <h1>Summary Statement — रिकॉर्ड सारांश</h1>
+      <div class="row">
+        <div class="small">यो पृष्ठले localStorage की `de_records_v1` र `de_custom_cols_v1` बाट डेटा पढ्छ र स्वतः अपडेट गर्छ। (तपाईंले Save / Restore गर्दा यहाँ देखिनेछ)</div>
+        <div class="controls">
+          <button id="refreshBtn" class="btn secondary">Refresh</button>
+          <button id="exportCsv" class="btn">Export CSV</button>
+          <button id="printBtn" class="btn secondary">Print</button>
+        </div>
+      </div>
 
-  <div class="controls">
-    <div class="filters">
-      <label>From <input id="fromDate" type="date"></label>
-      <label>To <input id="toDate" type="date"></label>
-      <label>Bank <input id="bankFilter" type="text" placeholder="leave blank for all"></label>
-      <button id="apply">Apply Filter</button>
-      <button id="clear">Clear</button>
-    </div>
-    <div style="margin-left:auto;display:flex;gap:8px">
-      <button id="exportCSV">Export CSV</button>
-      <button id="exportXLS">Export Excel (.xls)</button>
-      <button id="exportPDF">Export PDF</button>
-      <button id="printBtn">Print</button>
+      <div class="stats" id="statsArea" style="margin-top:12px;">
+        <!-- dynamic stat boxes -->
+      </div>
+
+      <div style="margin-top:12px;" class="card">
+        <div style="display:flex;gap:8px;align-items:center;justify-content:space-between;">
+          <div class="filter">
+            <label class="muted">Search:</label>
+            <input id="q" type="search" placeholder="client / model / engine / frame ..." />
+            <label class="muted">Model:</label>
+            <select id="modelFilter"><option value="">All</option><option>RE</option><option>Maxima</option></select>
+            <label class="muted">Finance:</label>
+            <select id="financeFilter"><option value="">All</option><option>Finance</option><option>Cash</option><option>Exchange</option><option>Cash & Exchange</option></select>
+          </div>
+          <div class="small muted">Last sync: <span id="lastSync">—</span></div>
+        </div>
+
+        <div style="margin-top:8px;">
+          <table id="summaryTable" aria-live="polite">
+            <thead>
+              <tr id="theadRow"><!-- dynamic headings --></tr>
+            </thead>
+            <tbody id="tbodyRow"><!-- dynamic rows --></tbody>
+          </table>
+          <div id="noData" class="no-data" style="display:none;">No records found</div>
+        </div>
+      </div>
+
+      <div class="card small" style="margin-top:8px;">
+        <div><strong>Notes:</strong> यो पृष्ठले ब्राउजरको localStorage नै प्रयोग गर्छ — त्यसैले यो file लाई एउटै ब्राउजर/उही origin मा खोल्नुहोस्। (यदि तपाईं file:// मा समस्या आउँछ भने सानो local server चलाउनुहोस् — उदाहरण: `npx serve` वा `python -m http.server`)</div>
+      </div>
     </div>
   </div>
 
-  <div id="summary" class="small"></div>
-
-  <div style="overflow:auto;max-height:540px">
-    <table id="tbl">
-      <thead>
-        <tr><th>Bank</th><th>Date</th><th class="right">Opening</th><th class="right">Txn (type)</th><th class="right">Closing</th></tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
-</div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-function fmt(n){return Number(n||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});}
-function load(){try{return JSON.parse(localStorage.getItem('bank_statement_html_v2')||'[]')}catch(e){return []}}
-function render(list){
-  const tbody=document.querySelector('#tbl tbody'); tbody.innerHTML='';
-  if(!list.length){tbody.innerHTML='<tr><td colspan=5 style="text-align:center;padding:18px;color:#666">No records found.</td></tr>'; return;}
-  let totalOpen=0,totalTxn=0,totalClose=0;
-  list.sort((a,b)=> (a.date < b.date?1:-1));
-  for(const r of list){
-    const tr=document.createElement('tr');
-    tr.innerHTML=`<td>${r.bankName||''}</td>
-      <td>${r.date||''}</td>
-      <td class="right">${fmt(r.openingBalance)}</td>
-      <td class="right">${fmt(r.todaysTransaction)} (${r.txnType||''})</td>
-      <td class="right">${fmt(r.closingBalance)}</td>`;
-    tbody.appendChild(tr);
-    totalOpen+=Number(r.openingBalance||0); totalTxn+=Number(r.todaysTransaction||0); totalClose+=Number(r.closingBalance||0);
-  }
-  document.getElementById('summary').textContent = `Records: ${list.length} — Opening Total: ${fmt(totalOpen)} | Txn Total: ${fmt(totalTxn)} | Closing Total: ${fmt(totalClose)}`;
+/*
+  summary.html
+  - Reads records from localStorage keys used by the form:
+      RECORDS_KEY = 'de_records_v1'
+      COLS_KEY = 'de_custom_cols_v1'
+  - Renders totals, breakdowns and table
+  - Auto-updates on storage events and via short poll (to catch same-tab saves)
+*/
+
+const RECORDS_KEY = 'de_records_v1';
+const COLS_KEY = 'de_custom_cols_v1';
+
+const els = {
+  statsArea: document.getElementById('statsArea'),
+  summaryTable: document.getElementById('summaryTable'),
+  theadRow: document.getElementById('theadRow'),
+  tbodyRow: document.getElementById('tbodyRow'),
+  noData: document.getElementById('noData'),
+  q: document.getElementById('q'),
+  modelFilter: document.getElementById('modelFilter'),
+  financeFilter: document.getElementById('financeFilter'),
+  refreshBtn: document.getElementById('refreshBtn'),
+  lastSync: document.getElementById('lastSync'),
+  exportCsv: document.getElementById('exportCsv'),
+  printBtn: document.getElementById('printBtn')
+};
+
+function readRecords(){
+  try {
+    const raw = localStorage.getItem(RECORDS_KEY) || '[]';
+    const arr = JSON.parse(raw);
+    if(!Array.isArray(arr)) return [];
+    return arr.slice().sort((a,b)=> (b.savedAt||0)-(a.savedAt||0));
+  } catch(e){ return []; }
+}
+function readCols(){
+  try {
+    const raw = localStorage.getItem(COLS_KEY) || '[]';
+    const arr = JSON.parse(raw);
+    if(!Array.isArray(arr)) return [];
+    return arr;
+  } catch(e){ return []; }
 }
 
-function applyFilter(){
-  const from=document.getElementById('fromDate').value;
-  const to=document.getElementById('toDate').value;
-  const bank=document.getElementById('bankFilter').value.trim().toLowerCase();
-  let list=load();
-  if(from) list = list.filter(r=>r.date>=from);
-  if(to) list = list.filter(r=>r.date<=to);
-  if(bank) list = list.filter(r=>(r.bankName||'').toLowerCase().includes(bank));
-  render(list);
-  return list;
+function formatDate(d){
+  if(!d) return '';
+  try { return new Date(d).toLocaleString(); } catch(e){ return String(d); }
 }
 
-document.getElementById('apply').addEventListener('click',()=>applyFilter());
-document.getElementById('clear').addEventListener('click',()=>{document.getElementById('fromDate').value='';document.getElementById('toDate').value='';document.getElementById('bankFilter').value='';render(load());});
-
-// CSV/XLS export helpers
-function exportCSV(list){
-  if(!list.length){alert('No data');return;}
-  const header=['Bank','Date','Opening','Txn','TxnType','Closing'];
-  const rows=list.map(r=>[r.bankName,r.date,r.openingBalance,r.todaysTransaction,r.txnType,r.closingBalance]);
-  const csv=[header.join(','),...rows.map(r=>r.map(c=>`"${String(c||'').replace(/"/g,'""')}"`).join(','))].join('\\n');
-  const blob=new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='bank_statements.csv'; a.click(); URL.revokeObjectURL(url);
-}
-function exportXLS(list){
-  if(!list.length){alert('No data');return;}
-  let html='<table border=1><tr><th>Bank</th><th>Date</th><th>Opening</th><th>Txn</th><th>TxnType</th><th>Closing</th></tr>';
-  list.forEach(r=>{html+=`<tr><td>${r.bankName}</td><td>${r.date}</td><td>${r.openingBalance}</td><td>${r.todaysTransaction}</td><td>${r.txnType}</td><td>${r.closingBalance}</td></tr>`});
-  html+='</table>';
-  const blob=new Blob([html],{type:'application/vnd.ms-excel'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='bank_statements.xls'; a.click(); URL.revokeObjectURL(url);
-}
-
-document.getElementById('exportCSV').addEventListener('click',()=>exportCSV(applyFilter()));
-document.getElementById('exportXLS').addEventListener('click',()=>exportXLS(applyFilter()));
-document.getElementById('printBtn').addEventListener('click',()=>window.print());
-
-document.getElementById('exportPDF').addEventListener('click',()=>{
-  const { jsPDF } = window.jspdf; const doc = new jsPDF('p','pt','a4'); doc.setFontSize(14); doc.text('Bank Statement Report',40,40);
-  const list = applyFilter(); let y=70;
-  doc.setFontSize(10);
-  list.forEach(r=>{
-    doc.text(`${r.date} — ${r.bankName} — Opening: ${Number(r.openingBalance||0).toFixed(2)} Txn: ${Number(r.todaysTransaction||0).toFixed(2)} Closing: ${Number(r.closingBalance||0).toFixed(2)}`,40,y);
-    y+=18; if(y>740){doc.addPage(); y=40;}
+function buildStats(records, customCols){
+  const total = records.length;
+  const byModel = {};
+  const byFinance = {};
+  const byColour = {};
+  const recent = records.slice(0,10);
+  records.forEach(r=>{
+    const m = (r.model||'').toString(); if(m) byModel[m] = (byModel[m]||0)+1;
+    const f = (r.finance||'').toString(); if(f) byFinance[f] = (byFinance[f]||0)+1;
+    const c = (r.colour||'').toString(); if(c) byColour[c] = (byColour[c]||0)+1;
   });
-  doc.save('bank_statements.pdf');
+  return { total, byModel, byFinance, byColour, recent };
+}
+
+function renderStatsArea(stats){
+  els.statsArea.innerHTML = '';
+  const boxes = [
+    { title: 'Total Records', value: stats.total },
+    { title: 'Models', html: Object.keys(stats.byModel).length ? Object.entries(stats.byModel).map(([k,v])=> `${k}: ${v}`).join('<br>') : '—' },
+    { title: 'Finance', html: Object.keys(stats.byFinance).length ? Object.entries(stats.byFinance).map(([k,v])=> `${k}: ${v}`).join('<br>') : '—' },
+    { title: 'Colour', html: Object.keys(stats.byColour).length ? Object.entries(stats.byColour).map(([k,v])=> `${k}: ${v}`).join('<br>') : '—' }
+  ];
+  for(const b of boxes){
+    const div = document.createElement('div');
+    div.className = 'stat';
+    if(b.html) div.innerHTML = `<div style="font-size:12px;color:#234">${b.title}</div><div style="margin-top:8px;font-size:16px">${b.html}</div>`;
+    else div.innerHTML = `<div style="font-size:12px;color:#234">${b.title}</div><div style="margin-top:8px;font-size:20px">${b.value}</div>`;
+    els.statsArea.appendChild(div);
+  }
+}
+
+function allColumnsDef(){
+  // base columns — must match form's baseCols order
+  const baseCols = [
+    { key: 'datePickup', label: 'Date Pickup' },
+    { key: 'model', label: 'Model' },
+    { key: 'engineNo', label: 'Engine No' },
+    { key: 'frameNo', label: 'Frame No' },
+    { key: 'regNo', label: 'Registered No' },
+    { key: 'batteryNo', label: 'Battery No' },
+    { key: 'manuDate', label: 'Manufacturing Date' },
+    { key: 'colour', label: 'Colour' },
+    { key: 'finance', label: 'Finance' },
+    { key: 'clientName', label: "Client's Name" },
+    { key: 'address', label: 'Address' },
+    { key: 'contactNo', label: 'Contact No' },
+    { key: 'salesPerson', label: 'Sales Person' },
+    { key: 'remarks', label: 'Remarks' }
+  ];
+  const customs = readCols();
+  return baseCols.concat(customs);
+}
+
+function recordMatchesFilter(rec, q, model, finance){
+  const Q = (q||'').toLowerCase();
+  if(Q){
+    const cols = allColumnsDef();
+    let found = false;
+    for(const c of cols){
+      const v = String(rec[c.key]||'').toLowerCase();
+      if(v.includes(Q)){ found = true; break; }
+    }
+    if(!found) return false;
+  }
+  if(model && String(rec.model||'') !== model) return false;
+  if(finance && String(rec.finance||'') !== finance) return false;
+  return true;
+}
+
+function renderTable(records){
+  const cols = allColumnsDef();
+  // header
+  els.theadRow.innerHTML = '';
+  for(const c of cols){
+    const th = document.createElement('th');
+    th.textContent = c.label || c.key;
+    els.theadRow.appendChild(th);
+  }
+  const thAct = document.createElement('th'); thAct.textContent = 'Saved At'; els.theadRow.appendChild(thAct);
+
+  // body
+  els.tbodyRow.innerHTML = '';
+  const q = els.q.value.trim();
+  const model = els.modelFilter.value;
+  const finance = els.financeFilter.value;
+
+  const filtered = records.filter(r => recordMatchesFilter(r, q, model, finance));
+  if(filtered.length === 0){
+    els.summaryTable.style.display = 'none';
+    els.noData.style.display = 'block';
+    return;
+  } else {
+    els.summaryTable.style.display = '';
+    els.noData.style.display = 'none';
+  }
+
+  filtered.forEach(r=>{
+    const tr = document.createElement('tr');
+    for(const c of cols){
+      const td = document.createElement('td');
+      let v = r[c.key] || '';
+      if((c.key === 'datePickup' || c.key === 'manuDate') && v){
+        try { v = new Date(v).toLocaleDateString(); } catch(e) {}
+      }
+      td.innerHTML = (v !== null && v !== undefined) ? escapeHtml(String(v)) : '';
+      tr.appendChild(td);
+    }
+    const tdSaved = document.createElement('td');
+    tdSaved.textContent = r.savedAt ? new Date(r.savedAt).toLocaleString() : '';
+    tr.appendChild(tdSaved);
+    els.tbodyRow.appendChild(tr);
+  });
+}
+
+function escapeHtml(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function refreshView(){
+  const records = readRecords();
+  const cols = readCols();
+  const stats = buildStats(records, cols);
+  renderStatsArea(stats);
+  renderTable(records);
+  els.lastSync.textContent = new Date().toLocaleString();
+}
+
+// export csv of currently filtered view
+function exportCsv(){
+  const records = readRecords();
+  const cols = allColumnsDef();
+  const q = els.q.value.trim();
+  const model = els.modelFilter.value;
+  const finance = els.financeFilter.value;
+  const filtered = records.filter(r => recordMatchesFilter(r, q, model, finance));
+  if(filtered.length === 0){ alert('Export गर्नको लागि कुनै रिकॉर्ड छैन'); return; }
+  const header = cols.map(c => `"${String(c.label||c.key).replace(/"/g,'""')}"`).join(',');
+  const rows = filtered.map(r => cols.map(c => `"${String(r[c.key]||'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const csv = header + '\n' + rows;
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `summary_export_${(new Date()).toISOString().slice(0,19).replace(/[:T]/g,'-')}.csv`;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+}
+
+// init
+refreshView();
+
+// auto-refresh on storage change (fires for other tabs)
+window.addEventListener('storage', (e)=>{
+  if(e.key === RECORDS_KEY || e.key === COLS_KEY || e.key === null){
+    // null often indicates clear; refresh anyway
+    refreshView();
+  }
 });
 
-// initial render
-render(load());
+// also poll every 2000ms to catch same-tab updates (safe)
+let lastChecksum = '';
+function checksumData(){
+  try { return localStorage.getItem(RECORDS_KEY) + '|' + localStorage.getItem(COLS_KEY); } catch(e){ return ''; }
+}
+setInterval(()=>{
+  const c = checksumData();
+  if(c !== lastChecksum){ lastChecksum = c; refreshView(); }
+}, 2000);
+
+// UI events
+els.q.addEventListener('input', ()=> refreshView());
+els.modelFilter.addEventListener('change', ()=> refreshView());
+els.financeFilter.addEventListener('change', ()=> refreshView());
+els.refreshBtn.addEventListener('click', ()=> refreshView());
+els.exportCsv.addEventListener('click', ()=> exportCsv());
+els.printBtn.addEventListener('click', ()=> {
+  const w = window.open('', '_blank');
+  const records = readRecords();
+  const cols = allColumnsDef();
+  let html = `<html><head><meta charset="utf-8"><title>Print Summary</title><style>table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:6px;text-align:left}th{background:#f0f8ff}</style></head><body>`;
+  html += `<h3>Summary Export (${records.length})</h3><table><thead><tr>`;
+  for(const c of cols) html += `<th>${escapeHtml(c.label||c.key)}</th>`;
+  html += `<th>Saved At</th></tr></thead><tbody>`;
+  records.forEach(r=>{
+    html += '<tr>';
+    for(const c of cols){
+      let v = r[c.key] || '';
+      if((c.key === 'datePickup' || c.key === 'manuDate') && v){
+        try { v = new Date(v).toLocaleDateString(); } catch(e) {}
+      }
+      html += `<td>${escapeHtml(String(v))}</td>`;
+    }
+    html += `<td>${r.savedAt ? new Date(r.savedAt).toLocaleString() : ''}</td></tr>`;
+  });
+  html += `</tbody></table></body></html>`;
+  w.document.write(html);
+  w.document.close();
+  setTimeout(()=> w.print(), 400);
+});
 </script>
 </body>
 </html>
