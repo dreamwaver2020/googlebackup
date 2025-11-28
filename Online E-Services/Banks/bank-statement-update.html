@@ -1,307 +1,723 @@
 <!doctype html>
-<html lang="en">
+<html lang="ne">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Bank Statement Manager — HTML</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Complete Data Entry Form</title>
   <style>
-    .fade-in { animation: fadeIn 220ms ease; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px);} to { opacity: 1; transform: translateY(0);} }
-    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace; }
+    :root{
+      --primary:#0d6efd; --muted:#f4f8ff; --card:#fff; --shadow:rgba(0,0,0,0.08);
+      --danger:#dc3545; --ok:#28a745;
+    }
+    body{font-family:Inter, Arial, Helvetica, sans-serif; background:linear-gradient(180deg,#eef9ff,#f8fbff); margin:0; padding:14px;}
+    .wrap{max-width:1100px;margin:12px auto;padding:14px;}
+    .card{background:var(--card); border-radius:12px; box-shadow:0 6px 20px var(--shadow); padding:14px; margin-bottom:14px;}
+    h2{font-size:20px; margin:4px 0 12px; text-align:center; color:#023047;}
+
+    .form-grid{display:grid; grid-template-columns: 1fr; gap:10px;}
+    @media(min-width:980px){ .form-grid{ grid-template-columns: 1fr 1fr 1fr; gap:12px; } }
+
+    .block{ background:var(--muted); padding:10px; border-radius:10px; }
+    label{ display:block; font-weight:700; margin-bottom:6px; font-size:13px; color:#123; }
+    input[type="text"], input[type="date"], input[type="tel"], select, textarea{
+      width:100%; padding:9px 10px; border-radius:8px; border:1px solid #cfdce9; font-size:14px; box-sizing:border-box;
+    }
+    textarea{ min-height:64px; resize:vertical; }
+
+    .radio-row{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+    .radio-row label{ font-weight:600; font-size:14px; }
+
+    .controls{ display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; align-items:center; }
+    .btn{ border:0; padding:10px 12px; border-radius:8px; font-weight:700; cursor:pointer; background:var(--primary); color:#fff; }
+    .btn.secondary{ background:#6c757d; }
+    .btn.warn{ background:var(--danger); }
+    .btn.small{ padding:8px 10px; font-size:13px; }
+    .muted{ color:#666; font-size:13px; }
+
+    .top-row{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:space-between; margin-bottom:10px; }
+    .search-box{ display:flex; gap:8px; align-items:center; }
+    .search-box input{ width:260px; padding:8px; border-radius:8px; border:1px solid #cfdce9; }
+
+    .table-wrap{ overflow:auto; }
+    table{ width:100%; border-collapse:collapse; font-size:14px; min-width:900px; }
+    th, td{ padding:8px 10px; border:1px solid #e6eef9; text-align:left; vertical-align:middle; }
+    th{ background:#eaf6ff; font-weight:700; font-size:13px; position:sticky; top:0; z-index:2; }
+    td .meta{ font-size:12px; color:#666; }
+
+    .pager{ display:flex; align-items:center; justify-content:center; gap:8px; margin-top:12px; flex-wrap:wrap; }
+
+    #toast{ position:fixed; right:18px; bottom:18px; background:var(--ok); color:#fff; padding:12px 16px; border-radius:10px; transform:translateY(30px); opacity:0; transition:all .35s; z-index:9999; font-weight:700; }
+    #toast.show{ transform:translateY(0); opacity:1; }
+
+    .action-btn{ padding:6px 8px; border-radius:6px; border:0; cursor:pointer; font-weight:700; }
+    .action-btn.edit{ background:#0d6efd; color:#fff; }
+    .action-btn.del{ background:var(--danger); color:#fff; }
+
+    .small-note{ font-size:13px; color:#444; margin-top:6px; }
+    .flex-row{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
   </style>
 </head>
-<body class="bg-gray-50 min-h-screen antialiased">
-  <div class="max-w-5xl mx-auto p-6">
-    <header class="mb-6">
-      <h1 class="text-3xl font-bold text-sky-700">Bank Statement Manager</h1>
-      <p class="text-sm text-gray-600">Fixed banks, daily ledger. Opening balance auto-rolls from last saved closing.</p>
-    </header>
+<body>
+  <!-- 🔵 HEADER ADDED HERE -->
+    <div class="header-box">
+      <img src="logo.png" alt="Company Logo">
+      <div class="header-title">
+       👽 𝗝𝗔𝗕𝗘𝗚𝗨𝗛𝗔𝗡𝗚 𝗠𝗨𝗟𝗧𝗜 𝗣𝗨𝗥𝗣𝗢𝗦𝗘 𝗖𝗢𝗠𝗣𝗔𝗡𝗬 𝗟𝗧𝗗.
+      </div>
+    </div>
+    <!-- END HEADER -->
+  <div class="wrap">
+    <div class="card">
+      <h2>𝗝𝗔𝗕𝗘𝗚𝗨𝗛𝗔𝗡𝗚 𝗠𝗨𝗟𝗧𝗜 𝗣𝗨𝗥𝗣𝗢𝗦𝗘 𝗖𝗢𝗠𝗣𝗔𝗬 𝗟𝘁𝗱.</h2>
+      <h2>𝓒𝓵𝓲𝓷𝓽𝓼 𝓡𝓮𝓬𝓸𝓻𝓭 𝓔𝓷𝓽𝓻𝔂</h2>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <!-- form -->
-      <section class="lg:col-span-2 bg-white p-6 rounded-2xl shadow">
-        <form id="recordForm" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-          <div>
-            <label class="block text-xs text-gray-600">Bank</label>
-            <select id="bankSelect" class="mt-1 w-full p-2 border rounded">
-              <option>Esewa</option>
-              <option>NCBL</option>
-              <option>Sunrise Bank</option>
-              <option>Nefscun</option>
-            </select>
+      <div class="form-grid" id="formGrid">
+        <!-- Column 1 -->
+        <div class="block">
+          <label for="datePickup">1. Date pickup</label>
+          <input id="datePickup" type="date" />
+
+          <label>2. Model</label>
+          <div class="radio-row" id="modelRadios">
+            <label><input type="radio" name="model" value="RE" checked> RE</label>
+            <label><input type="radio" name="model" value="Maxima"> Maxima</label>
           </div>
 
-          <div>
-            <label class="block text-xs text-gray-600">Date</label>
-            <input id="dateInput" type="date" class="mt-1 w-full p-2 border rounded" />
-          </div>
+          <label for="engineNo">3. Engine No</label>
+          <input id="engineNo" type="text" placeholder="Engine Number" />
 
-          <div>
-            <label class="block text-xs text-gray-600">Opening Balance</label>
-            <input id="openingInput" type="number" step="0.01" class="mt-1 w-full p-2 border rounded text-right mono" />
-            <div class="text-xs text-gray-400 mt-1">Auto-loaded from last saved closing</div>
-          </div>
+          <label for="frameNo">4. Frame No</label>
+          <input id="frameNo" type="text" placeholder="Frame Number" />
 
-          <div>
-            <label class="block text-xs text-gray-600">Today's Transaction</label>
-            <div class="flex items-center space-x-2 mt-1">
-              <label class="flex items-center space-x-1">
-                <input type="radio" name="txnType" value="receipt" id="receiptRadio" checked />
-                <span class="text-xs">Receipt</span>
-              </label>
-              <label class="flex items-center space-x-1">
-                <input type="radio" name="txnType" value="payment" id="paymentRadio" />
-                <span class="text-xs">Payment</span>
-              </label>
-            </div>
-            <input id="txnInput" type="number" step="0.01" class="mt-1 w-full p-2 border rounded text-right mono" />
-          </div>
-
-          <div class="md:col-span-4 flex items-center justify-between mt-2">
-            <div>
-              <div class="text-xs text-gray-600">Closing (auto)</div>
-              <div id="closingView" class="text-2xl font-semibold mono">0.00</div>
-            </div>
-
-            <div class="flex items-center gap-2">
-              <button id="saveBtn" class="px-4 py-2 bg-sky-600 text-white rounded hover:bg-sky-700">Save / Update</button>
-              <button id="clearBtn" type="button" class="px-4 py-2 border rounded">Clear</button>
-              <label class="inline-block px-3 py-2 border rounded cursor-pointer text-sm">
-                Import JSON
-                <input id="importFile" type="file" accept="application/json" class="hidden" />
-              </label>
-            </div>
-          </div>
-        </form>
-      </section>
-
-      <!-- side panel -->
-      <aside class="bg-white p-6 rounded-2xl shadow">
-        <div class="mb-4">
-          <label class="block text-xs text-gray-600">Search (bank or date)</label>
-          <input id="searchInput" placeholder="e.g., Esewa or 2025-10-01" class="mt-1 w-full p-2 border rounded" />
+          <label for="regNo">5. Registered No</label>
+          <input id="regNo" type="text" placeholder="Registration Number" />
         </div>
 
-        <div class="space-y-2">
-          <div class="flex items-center justify-between">
-            <div class="text-sm text-gray-600">Records</div>
-            <div id="countBadge" class="text-sm mono">0</div>
+        <!-- Column 2 -->
+        <div class="block">
+          <label for="batteryNo">6. Battery No</label>
+          <input id="batteryNo" type="text" placeholder="Battery Number" />
+
+          <label for="manuDate">7. Manufacturing Date</label>
+          <input id="manuDate" type="date" />
+
+          <label>8. Colour</label>
+          <div class="radio-row" id="colourRadios">
+            <label><input type="radio" name="colour" value="Blue" checked> Blue</label>
+            <label><input type="radio" name="colour" value="Red"> Red</label>
+            <label><input type="radio" name="colour" value="Green"> Green</label>
           </div>
 
-          <div class="flex gap-2">
-            <button id="exportCSV" class="flex-1 px-3 py-2 border rounded text-sm">Export CSV</button>
-            <button id="exportPDF" class="flex-1 px-3 py-2 border rounded text-sm">Export PDF</button>
-          </div>
-
-          <div class="pt-3 text-xs text-gray-500">Tip: Save daily to keep automatic rollovers.</div>
+          <label for="financeSelect">9. Finance</label>
+          <select id="financeSelect">
+            <option value="Finance">Finance</option>
+            <option value="Cash">Cash</option>
+            <option value="Exchange">Exchange</option>
+            <option value="Cash & Exchange">Cash & Exchange</option>
+          </select>
         </div>
-      </aside>
+
+        <!-- Column 3 -->
+        <div class="block">
+          <label for="clientName">10. Name of clients</label>
+          <input id="clientName" type="text" placeholder="Client Full Name" />
+
+          <label for="address">11. Address</label>
+          <input id="address" type="text" placeholder="Address" />
+
+          <label for="contactNo">12. Contact No</label>
+          <input id="contactNo" type="tel" placeholder="Phone Number" />
+
+          <label for="salesPerson">13. Sales person</label>
+          <input id="salesPerson" type="text" placeholder="Sales Person" />
+
+          <label for="remarks">14. Remarks</label>
+          <textarea id="remarks" placeholder="Remarks / Notes"></textarea>
+        </div>
+      </div>
+
+      <div style="margin-top:10px;" class="card">
+        <strong>15. Add Column (नयाँ कॉलम थप्न)</strong>
+        <div style="margin-top:8px;" class="flex-row">
+          <input id="newColName" type="text" placeholder="Column name (example: 'IMEI', 'ColorCode')" />
+          <button id="addColBtn" class="btn small">Add Column</button>
+          <button id="resetCols" class="btn small secondary">Reset Custom Columns</button>
+        </div>
+        <div class="small-note">यहाँ जोडिएका प्रत्येक कस्टम कॉलम फार्ममा र तालिकामा थपिन्छ र ब्राउजरमा बचाइन्छ।</div>
+      </div>
+
+      <div class="controls">
+        <button id="saveBtn" class="btn">Save</button>
+        <button id="clearBtn" class="btn secondary">Clear</button>
+
+        <div style="flex:1"></div>
+
+        <div class="muted">Records: <span id="totalCount">0</span></div>
+      </div>
     </div>
 
-    <!-- records table -->
-    <section class="mt-6 bg-white p-4 rounded-2xl shadow">
-      <div class="overflow-x-auto">
-        <table id="recordsTable" class="w-full table-auto">
-          <thead>
-            <tr class="text-left text-sm text-gray-500 border-b">
-              <th class="p-3">Bank</th>
-              <th class="p-3">Date</th>
-              <th class="p-3 text-right">Opening</th>
-              <th class="p-3 text-right">Txn</th>
-              <th class="p-3 text-right">Closing</th>
-              <th class="p-3">Actions</th>
+    <!-- List / Search / Export -->
+    <div class="card">
+      <div class="top-row">
+        <div class="search-box">
+          <input id="searchInput" type="text" placeholder="Search — client / model / engine / frame / sales / custom..." />
+          <button id="searchClear" class="btn small secondary">Clear</button>
+        </div>
+
+        <div style="display:flex; gap:8px; align-items:center;">
+          <button id="exportCsv" class="btn small">Export CSV</button>
+          <button id="exportPdf" class="btn small secondary">Export PDF</button>
+          <button id="backupBtn" class="btn small">Backup JSON</button>
+          <button id="restoreBtn" class="btn small secondary">Restore</button>
+          <input id="restoreFile" type="file" accept="application/json" style="display:none" />
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table id="recordTable" aria-live="polite">
+          <thead id="tableHead">
+            <tr id="theadRow">
+              <!-- dynamic -->
             </tr>
           </thead>
-          <tbody id="recordsBody">
-            <tr><td colspan="6" class="p-4 text-center text-gray-500">No records yet.</td></tr>
-          </tbody>
+          <tbody id="tableBody"></tbody>
         </table>
       </div>
-    </section>
 
-    <footer class="mt-6 text-sm text-gray-500 text-center">Data stored locally in this browser only. Export for backup.</footer>
+      <div class="pager">
+        <button id="prevBtn" class="btn small secondary">⬅ Prev</button>
+        <div class="info" id="pageInfo">Page 1 of 1</div>
+        <button id="nextBtn" class="btn small secondary">Next ➡</button>
+      </div>
+    </div>
   </div>
 
-  <!-- toast -->
-  <div id="toast" class="fixed right-6 bottom-6 bg-sky-600 text-white px-4 py-2 rounded-lg shadow hidden"></div>
+  <div id="toast">Saved ✓</div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-(function(){
-  const STORAGE_KEY = 'bank_statement_html_v2';
-  const bankSelect = document.getElementById('bankSelect');
-  const dateInput = document.getElementById('dateInput');
-  const openingInput = document.getElementById('openingInput');
-  const txnInput = document.getElementById('txnInput');
-  const closingView = document.getElementById('closingView');
-  const saveBtn = document.getElementById('saveBtn');
-  const clearBtn = document.getElementById('clearBtn');
-  const importFile = document.getElementById('importFile');
-  const exportPDFBtn = document.getElementById('exportPDF');
-  const recordsBody = document.getElementById('recordsBody');
-  const countBadge = document.getElementById('countBadge');
-  const searchInput = document.getElementById('searchInput');
-  const toastEl = document.getElementById('toast');
+/*
+  Complete single-file data entry system
+  - dynamic custom columns
+  - save / edit / delete / search / export / backup / restore / pagination
+  - stores records and custom column definitions in localStorage
+*/
 
-  const receiptRadio = document.getElementById('receiptRadio');
-  const paymentRadio = document.getElementById('paymentRadio');
+// --- Config & state ---
+const perPage = 10;
+let currentPage = 1;
+let editingId = null;
+const RECORDS_KEY = 'de_records_v1';
+const COLS_KEY = 'de_custom_cols_v1';
 
-  let records = [];
+// base columns in order (these are also form field ids)
+const baseCols = [
+  { key: 'datePickup', label: 'Date Pickup' },
+  { key: 'model', label: 'Model' },
+  { key: 'engineNo', label: 'Engine No' },
+  { key: 'frameNo', label: 'Frame No' },
+  { key: 'regNo', label: 'Registered No' },
+  { key: 'batteryNo', label: 'Battery No' },
+  { key: 'manuDate', label: 'Manufacturing Date' },
+  { key: 'colour', label: 'Colour' },
+  { key: 'finance', label: 'Finance' },
+  { key: 'clientName', label: "Client's Name" },
+  { key: 'address', label: 'Address' },
+  { key: 'contactNo', label: 'Contact No' },
+  { key: 'salesPerson', label: 'Sales Person' },
+  { key: 'remarks', label: 'Remarks' }
+];
 
-  function showToast(msg, ms=2500){
-    toastEl.textContent = msg;
-    toastEl.classList.remove('hidden');
-    toastEl.classList.add('fade-in');
-    setTimeout(()=> toastEl.classList.add('hidden'), ms);
+// DOM refs
+const els = {
+  // form fields
+  datePickup: document.getElementById('datePickup'),
+  modelRadios: document.getElementById('modelRadios'),
+  engineNo: document.getElementById('engineNo'),
+  frameNo: document.getElementById('frameNo'),
+  regNo: document.getElementById('regNo'),
+  batteryNo: document.getElementById('batteryNo'),
+  manuDate: document.getElementById('manuDate'),
+  colourRadios: document.getElementById('colourRadios'),
+  financeSelect: document.getElementById('financeSelect'),
+  clientName: document.getElementById('clientName'),
+  address: document.getElementById('address'),
+  contactNo: document.getElementById('contactNo'),
+  salesPerson: document.getElementById('salesPerson'),
+  remarks: document.getElementById('remarks'),
+  newColName: document.getElementById('newColName'),
+  addColBtn: document.getElementById('addColBtn'),
+  resetCols: document.getElementById('resetCols'),
+
+  saveBtn: document.getElementById('saveBtn'),
+  clearBtn: document.getElementById('clearBtn'),
+  totalCount: document.getElementById('totalCount'),
+
+  searchInput: document.getElementById('searchInput'),
+  searchClear: document.getElementById('searchClear'),
+  exportCsv: document.getElementById('exportCsv'),
+  exportPdf: document.getElementById('exportPdf'),
+  backupBtn: document.getElementById('backupBtn'),
+  restoreBtn: document.getElementById('restoreBtn'),
+  restoreFile: document.getElementById('restoreFile'),
+
+  tableHead: document.getElementById('tableHead'),
+  theadRow: document.getElementById('theadRow'),
+  tableBody: document.getElementById('tableBody'),
+  prevBtn: document.getElementById('prevBtn'),
+  nextBtn: document.getElementById('nextBtn'),
+  pageInfo: document.getElementById('pageInfo'),
+
+  toast: document.getElementById('toast')
+};
+
+// helpers for radio values
+function getRadioValue(name){ const r = document.querySelector(`input[name="${name}"]:checked`); return r ? r.value : ''; }
+function setRadioValue(name, val){ const r = document.querySelectorAll(`input[name="${name}"]`); r.forEach(i => i.checked = (i.value === val)); }
+
+// storage helpers
+function getRecords(){ try { return JSON.parse(localStorage.getItem(RECORDS_KEY) || '[]'); } catch(e){ return []; } }
+function setRecords(arr){
+  // ensure each has _id and savedAt
+  const normalized = (arr || []).map(r => {
+    if(!r._id) r._id = 'id_'+Date.now()+'_'+Math.floor(Math.random()*9999);
+    if(!r.savedAt) r.savedAt = Date.now();
+    return r;
+  });
+  // sort by savedAt desc
+  normalized.sort((a,b)=> (b.savedAt||0) - (a.savedAt||0));
+  localStorage.setItem(RECORDS_KEY, JSON.stringify(normalized));
+}
+
+function getCustomCols(){ try { return JSON.parse(localStorage.getItem(COLS_KEY) || '[]'); } catch(e){ return []; } }
+function setCustomCols(cols){ localStorage.setItem(COLS_KEY, JSON.stringify(cols || [])); }
+
+// id gen
+function genId(){ return 'id_'+Date.now()+'_'+Math.floor(Math.random()*9999); }
+
+// toast
+function showToast(msg='Saved ✓'){ els.toast.textContent = msg; els.toast.classList.add('show'); setTimeout(()=> els.toast.classList.remove('show'),1800); }
+
+// build current columns (base + custom)
+function allColumns(){ return baseCols.concat(getCustomCols()); }
+
+// render table head based on current columns
+function renderTableHead(){
+  const cols = allColumns();
+  els.theadRow.innerHTML = '';
+  for(const c of cols){
+    const th = document.createElement('th');
+    th.textContent = c.label;
+    els.theadRow.appendChild(th);
+  }
+  // actions column
+  const thAct = document.createElement('th');
+  thAct.textContent = 'Actions';
+  thAct.style.width = '150px';
+  els.theadRow.appendChild(thAct);
+}
+
+// clear form
+function clearForm(){
+  editingId = null;
+  els.datePickup.value = '';
+  setRadioValue('model', 'RE');
+  els.engineNo.value = '';
+  els.frameNo.value = '';
+  els.regNo.value = '';
+  els.batteryNo.value = '';
+  els.manuDate.value = '';
+  setRadioValue('colour', 'Blue');
+  els.financeSelect.value = 'Finance';
+  els.clientName.value = '';
+  els.address.value = '';
+  els.contactNo.value = '';
+  els.salesPerson.value = '';
+  els.remarks.value = '';
+  // clear custom field inputs if present
+  const customs = getCustomCols();
+  for(const c of customs){
+    const el = document.getElementById('fld_'+c.key);
+    if(el) el.value = '';
+  }
+  els.saveBtn.textContent = 'Save';
+  els.saveBtn.classList.remove('warn');
+}
+
+// fill form for edit
+function fillFormForEdit(rec){
+  editingId = rec._id;
+  els.datePickup.value = rec.datePickup || '';
+  setRadioValue('model', rec.model || 'RE');
+  els.engineNo.value = rec.engineNo || '';
+  els.frameNo.value = rec.frameNo || '';
+  els.regNo.value = rec.regNo || '';
+  els.batteryNo.value = rec.batteryNo || '';
+  els.manuDate.value = rec.manuDate || '';
+  setRadioValue('colour', rec.colour || 'Blue');
+  els.financeSelect.value = rec.finance || 'Finance';
+  els.clientName.value = rec.clientName || '';
+  els.address.value = rec.address || '';
+  els.contactNo.value = rec.contactNo || '';
+  els.salesPerson.value = rec.salesPerson || '';
+  els.remarks.value = rec.remarks || '';
+  // custom fields
+  const customs = getCustomCols();
+  for(const c of customs){
+    const el = document.getElementById('fld_'+c.key);
+    if(el) el.value = rec[c.key] || '';
+  }
+  els.saveBtn.textContent = 'Update';
+  els.saveBtn.classList.add('warn');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+// collect form payload
+function collectForm(){
+  const payload = {};
+  payload._id = editingId || genId();
+  payload.savedAt = Date.now();
+  payload.datePickup = els.datePickup.value;
+  payload.model = getRadioValue('model');
+  payload.engineNo = els.engineNo.value.trim();
+  payload.frameNo = els.frameNo.value.trim();
+  payload.regNo = els.regNo.value.trim();
+  payload.batteryNo = els.batteryNo.value.trim();
+  payload.manuDate = els.manuDate.value;
+  payload.colour = getRadioValue('colour');
+  payload.finance = els.financeSelect.value;
+  payload.clientName = els.clientName.value.trim();
+  payload.address = els.address.value.trim();
+  payload.contactNo = els.contactNo.value.trim();
+  payload.salesPerson = els.salesPerson.value.trim();
+  payload.remarks = els.remarks.value.trim();
+
+  // add custom fields
+  const customs = getCustomCols();
+  for(const c of customs){
+    const el = document.getElementById('fld_'+c.key);
+    payload[c.key] = el ? el.value.trim() : '';
   }
 
-  function loadRecords(){
-    const raw = localStorage.getItem(STORAGE_KEY);
-    records = raw ? JSON.parse(raw) : [];
-  }
+  return payload;
+}
 
-  function saveRecords(){
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
-    countBadge.textContent = records.length;
+// save / update handler
+els.saveBtn.addEventListener('click', ()=>{
+  const payload = collectForm();
+  // basic validation — require clientName and model (you can adjust)
+  if(!payload.clientName){
+    alert('Client name राख्नुस् (Name of clients required).');
+    return;
   }
-
-  function getRecordId(bank, date){
-    return bank + '||' + date;
-  }
-
-  function getLastClosingFor(bank, isoDate){
-    const filtered = records.filter(r => r.bankName === bank && r.date <= isoDate);
-    if (!filtered.length) return 0;
-    filtered.sort((a,b) => b.date.localeCompare(a.date));
-    return Number(filtered[0].closingBalance) || 0;
-  }
-
-  function formatMoney(n){
-    return (Number(n)||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
-  }
-
-  function updateClosingView(){
-    const ob = Number(openingInput.value) || 0;
-    const tt = Number(txnInput.value) || 0;
-    const type = receiptRadio.checked ? 'receipt' : 'payment';
-    const cb = type === 'receipt' ? ob + tt : ob - tt;
-    closingView.textContent = formatMoney(cb);
-    return cb;
-  }
-
-  function refreshFormDefaults(){
-    const bank = bankSelect.value;
-    const date = dateInput.value || todayISO();
-    const last = getLastClosingFor(bank, date);
-    openingInput.value = last;
-    txnInput.value = 0;
-    updateClosingView();
-  }
-
-  function renderRecords(filterText=''){
-    const tbody = recordsBody;
-    tbody.innerHTML = '';
-    let list = records;
-    if (filterText){
-      const ft = filterText.toLowerCase();
-      list = list.filter(r => (r.bankName + ' ' + r.date).toLowerCase().includes(ft));
+  let arr = getRecords();
+  if(editingId){
+    const idx = arr.findIndex(r=> r._id === editingId);
+    if(idx !== -1){
+      arr[idx] = payload;
+      setRecords(arr);
+      showToast('Updated ✓');
+    } else {
+      // fallback: push
+      arr.push(payload); setRecords(arr); showToast('Saved ✓');
     }
-    list.sort((a,b) => b.date.localeCompare(a.date) || a.bankName.localeCompare(b.bankName));
-    if (!list.length){
-      tbody.innerHTML = '<tr><td colspan=\"6\" class=\"p-4 text-center text-gray-500\">No records found.</td></tr>';
-      return;
+  } else {
+    arr.push(payload);
+    setRecords(arr);
+    showToast('Saved ✓');
+  }
+  clearForm();
+  currentPage = 1; render();
+});
+
+// delete record
+function deleteRecord(id){
+  if(!confirm('के यो रेकर्ड मेटाउन निश्चित हुनुहुन्छ?')) return;
+  let arr = getRecords();
+  arr = arr.filter(r=> r._id !== id);
+  setRecords(arr);
+  // adjust page if needed
+  const totalPages = Math.max(1, Math.ceil(filteredRecords().length / perPage));
+  if(currentPage > totalPages) currentPage = totalPages;
+  render();
+  showToast('Deleted ✓');
+}
+
+// edit
+function editRecord(id){
+  const arr = getRecords();
+  const rec = arr.find(r=> r._id === id);
+  if(rec) fillFormForEdit(rec);
+}
+
+// search / filter
+function filteredRecords(){
+  const q = els.searchInput.value.trim().toLowerCase();
+  const arr = getRecords().slice().sort((a,b)=> (b.savedAt||0) - (a.savedAt||0));
+  if(!q) return arr;
+  return arr.filter(r=>{
+    // search in base + custom fields
+    const allCols = allColumns();
+    for(const c of allCols){
+      const val = String(r[c.key]||'').toLowerCase();
+      if(val.includes(q)) return true;
     }
-    for (const r of list){
+    return false;
+  });
+}
+
+// render table rows with pagination
+function render(){
+  renderTableHead();
+  const all = filteredRecords();
+  const total = all.length;
+  const totalPages = Math.max(1, Math.ceil(total / perPage));
+  if(currentPage > totalPages) currentPage = totalPages;
+  const start = (currentPage - 1) * perPage;
+  const pageRecs = all.slice(start, start + perPage);
+
+  els.tableBody.innerHTML = '';
+  if(pageRecs.length === 0){
+    els.tableBody.innerHTML = `<tr><td colspan="${allColumns().length + 1}" style="text-align:center;padding:18px;">No records found</td></tr>`;
+  } else {
+    for(const r of pageRecs){
       const tr = document.createElement('tr');
-      tr.className = 'border-b hover:bg-gray-50';
-      tr.innerHTML = `
-        <td class=\"p-3 font-medium text-sky-700\">${r.bankName}</td>
-        <td class=\"p-3 text-sm text-gray-600\">${r.date}</td>
-        <td class=\"p-3 text-right mono\">${formatMoney(r.openingBalance)}</td>
-        <td class=\"p-3 text-right mono\">${formatMoney(r.todaysTransaction)} (${r.txnType})</td>
-        <td class=\"p-3 text-right mono font-semibold\">${formatMoney(r.closingBalance)}</td>
-        <td class=\"p-3\"><button data-id=\"${r.id}\" class=\"delBtn px-3 py-1 border rounded text-sm text-red-600\">Delete</button></td>`;
-      tbody.appendChild(tr);
+      const cells = [];
+      for(const c of allColumns()){
+        const td = document.createElement('td');
+        let v = r[c.key] || '';
+        // format dates to readable when possible
+        if((c.key === 'datePickup' || c.key === 'manuDate') && v){
+          try { v = new Date(v).toLocaleDateString(); } catch(e){ }
+        }
+        td.innerHTML = `<div style="font-weight:600">${escapeHtml(String(v))}</div>`;
+        tr.appendChild(td);
+      }
+      // actions
+      const tdAct = document.createElement('td');
+      tdAct.innerHTML = `
+        <button class="action-btn edit" onclick="window.__de_edit('${r._id}')">Edit</button>
+        <button class="action-btn del" onclick="window.__de_del('${r._id}')">Delete</button>
+        <div class="meta">${new Date(r.savedAt).toLocaleString()}</div>
+      `;
+      tr.appendChild(tdAct);
+      els.tableBody.appendChild(tr);
     }
-    tbody.querySelectorAll('.delBtn').forEach(btn => btn.addEventListener('click', onDelete));
   }
 
-  function onDelete(e){
-    const id = e.currentTarget.dataset.id;
-    if (!confirm('Delete this record permanently?')) return;
-    records = records.filter(r => r.id !== id);
-    saveRecords();
-    renderRecords(searchInput.value.trim());
-    showToast('Deleted');
+  els.pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+  els.prevBtn.disabled = currentPage === 1;
+  els.nextBtn.disabled = currentPage === totalPages;
+  els.totalCount.textContent = total;
+}
+
+// expose functions for inline onclick
+window.__de_edit = editRecord;
+window.__de_del = deleteRecord;
+
+// prev / next
+els.prevBtn.addEventListener('click', ()=>{ if(currentPage>1) currentPage--; render(); });
+els.nextBtn.addEventListener('click', ()=>{ const totalPages = Math.max(1, Math.ceil(filteredRecords().length / perPage)); if(currentPage<totalPages) currentPage++; render(); });
+
+// search
+els.searchInput.addEventListener('input', ()=>{ currentPage = 1; render(); });
+els.searchClear.addEventListener('click', ()=>{ els.searchInput.value = ''; currentPage = 1; render(); });
+
+// CSV export (export filtered full set)
+els.exportCsv.addEventListener('click', ()=>{
+  const arr = filteredRecords();
+  if(arr.length === 0){ alert('Export गर्न को लागी कुनै रिकॉर्ड छैन'); return; }
+  const cols = allColumns();
+  const headers = cols.map(c => csvSafe(c.label));
+  const rows = arr.map(r => cols.map(c => csvSafe(r[c.key] || '')));
+  const csv = [headers.join(','), ...rows.map(r=> r.join(','))].join('\n');
+  downloadBlob(csv, `records_${(new Date()).toISOString().slice(0,19).replace(/[:T]/g,'-')}.csv`, 'text/csv;charset=utf-8;');
+});
+
+// PDF export (open printable HTML)
+els.exportPdf.addEventListener('click', ()=>{
+  const arr = filteredRecords();
+  if(arr.length === 0){ alert('Export गर्न को लागी कुनै रिकॉर्ड छैन'); return; }
+  const cols = allColumns();
+  let html = `<html><head><meta charset="utf-8"><title>Records</title>
+    <style>body{font-family:Arial;padding:12px;}table{width:100%;border-collapse:collapse;font-size:12px}th,td{border:1px solid #ddd;padding:6px;text-align:left}th{background:#f0f8ff}</style>
+    </head><body><h3>Exported Records (${arr.length})</h3><table><thead><tr>`;
+  for(const c of cols) html += `<th>${escapeHtml(c.label)}</th>`;
+  html += `</tr></thead><tbody>`;
+  arr.forEach(r=>{
+    html += `<tr>`;
+    for(const c of cols){
+      let v = r[c.key] || '';
+      if((c.key === 'datePickup' || c.key === 'manuDate') && v){
+        try { v = new Date(v).toLocaleDateString(); } catch(e){}
+      }
+      html += `<td>${escapeHtml(String(v))}</td>`;
+    }
+    html += `</tr>`;
+  });
+  html += `</tbody></table></body></html>`;
+  const w = window.open('', '_blank');
+  w.document.write(html);
+  w.document.close();
+  setTimeout(()=> w.print(), 600);
+});
+
+// backup (download JSON)
+els.backupBtn.addEventListener('click', ()=>{
+  const arr = getRecords();
+  const json = JSON.stringify({ records: arr, customCols: getCustomCols() }, null, 2);
+  downloadBlob(json, `records_backup_${(new Date()).toISOString().slice(0,19).replace(/[:T]/g,'-')}.json`, 'application/json');
+  showToast('Backup ready ✓');
+});
+
+// restore
+els.restoreBtn.addEventListener('click', ()=>{
+  els.restoreFile.value = '';
+  els.restoreFile.click();
+});
+els.restoreFile.addEventListener('change', (ev)=>{
+  const f = ev.target.files && ev.target.files[0];
+  if(!f) return;
+  if(!confirm('पक्का? Restore गर्दा हालको स्थानीय डेटा overwrite हुनेछ। Proceed गर्नुहुन्छ?')) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try {
+      const data = JSON.parse(e.target.result);
+      // support both array and object {records, customCols}
+      let recs = [];
+      let cols = [];
+      if(Array.isArray(data)) recs = data;
+      else {
+        recs = Array.isArray(data.records) ? data.records : [];
+        cols = Array.isArray(data.customCols) ? data.customCols : (Array.isArray(data.customColumns) ? data.customColumns : []);
+      }
+      // normalize recs
+      recs = recs.map(r => {
+        const rec = Object.assign({}, r);
+        if(!rec._id) rec._id = genId();
+        if(!rec.savedAt) rec.savedAt = Date.now();
+        return rec;
+      });
+      setRecords(recs);
+      // normalize cols (must be objects with key+label)
+      cols = cols.map((c, idx) => {
+        if(typeof c === 'string') return { key: 'custom_'+idx+'_'+slugify(c), label: c };
+        if(c.key && c.label) return c;
+        // fallback
+        return { key: c.key || ('custom_'+idx+'_'+slugify(c.label||'col')), label: c.label || ('Column '+(idx+1)) };
+      });
+      setCustomCols(cols);
+      currentPage = 1; render(); showToast('Restore सफल ✓');
+    } catch(err){
+      alert('Restore विफल: ' + err.message);
+    }
+  };
+  reader.readAsText(f);
+});
+
+// download helper
+function downloadBlob(content, filename, type){
+  const blob = new Blob([content], { type: type || 'application/octet-stream' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+}
+
+// CSV safe
+function csvSafe(v){
+  if(v == null) return '""';
+  const s = String(v).replace(/"/g, '""');
+  return `"${s}"`;
+}
+
+// escape HTML
+function escapeHtml(str){
+  if(str == null) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// --- Custom columns handling ---
+// custom columns stored as array of objects: { key: 'custom_1_xxx', label: 'IMEI' }
+function slugify(txt){ return String(txt || '').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''); }
+
+function renderCustomFieldsArea(){
+  // ensure each custom col also has an input in the form
+  const customs = getCustomCols();
+  // We'll append custom fields after the third block (end of form)
+  // find the form grid
+  const formGrid = document.getElementById('formGrid');
+  // Remove any existing custom-field-block
+  const existing = document.getElementById('customBlock');
+  if(existing) existing.remove();
+  if(customs.length === 0) return;
+  const div = document.createElement('div');
+  div.className = 'block';
+  div.id = 'customBlock';
+  // build inputs
+  for(const c of customs){
+    const label = document.createElement('label');
+    label.textContent = c.label;
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.id = 'fld_' + c.key;
+    input.placeholder = c.label;
+    input.style.marginBottom = '8px';
+    div.appendChild(label);
+    div.appendChild(input);
   }
+  formGrid.appendChild(div);
+}
 
-  function onSave(e){
-    e.preventDefault();
-    const bank = bankSelect.value;
-    const date = dateInput.value || todayISO();
-    const ob = Number(openingInput.value) || 0;
-    const tt = Number(txnInput.value) || 0;
-    const txnType = receiptRadio.checked ? 'receipt' : 'payment';
-    const cb = txnType === 'receipt' ? ob + tt : ob - tt;
-    const id = getRecordId(bank, date);
-    const createdAt = new Date().toISOString();
-
-    const newRec = { id, bankName: bank, date, openingBalance: ob, todaysTransaction: tt, txnType, closingBalance: cb, createdAt };
-    records = records.filter(r => r.id !== id);
-    records.push(newRec);
-    saveRecords();
-    renderRecords(searchInput.value.trim());
-    showToast('Saved');
+// add custom column
+els.addColBtn.addEventListener('click', ()=>{
+  const name = els.newColName.value.trim();
+  if(!name){ alert('कृपया column name लेख्नुस्'); return; }
+  const customs = getCustomCols();
+  // check duplicates by label
+  if(customs.some(c => c.label.toLowerCase() === name.toLowerCase())){
+    alert('यो नामले पहिले नै column छ।');
+    return;
   }
+  // create key
+  const key = 'custom_' + Date.now() + '_' + slugify(name);
+  customs.push({ key, label: name });
+  setCustomCols(customs);
+  els.newColName.value = '';
+  renderCustomFieldsArea();
+  render(); // re-render table with new column
+  showToast('Column थपियो ✓');
+});
 
-  function onClear(){
-    txnInput.value = '';
-    updateClosingView();
-  }
+// reset custom columns
+els.resetCols.addEventListener('click', ()=>{
+  if(!confirm('साच्चै सबै custom columns हटाउन चाहनुहुन्छ?')) return;
+  setCustomCols([]);
+  // optionally remove custom values from records? We'll leave existing values but columns won't show.
+  renderCustomFieldsArea();
+  render();
+  showToast('Custom columns हटाइयो ✓');
+});
 
-  function onExportPDF(){
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    doc.setFontSize(16);
-    doc.text('Bank Statement Records', 14, 15);
-    doc.setFontSize(11);
-    let y = 30;
-    records.forEach(r => {
-      doc.text(`Bank: ${r.bankName}`, 14, y);
-      doc.text(`Date: ${r.date}`, 14, y+6);
-      doc.text(`Opening: ${r.openingBalance.toFixed(2)} | ${r.txnType === 'receipt' ? 'Receipt' : 'Payment'}: ${r.todaysTransaction.toFixed(2)} | Closing: ${r.closingBalance.toFixed(2)}`, 14, y+12);
-      y += 22;
-      if (y > 270) { doc.addPage(); y = 20; }
-    });
-    doc.save('Bank_Statement.pdf');
-  }
+// --- Init ---
+// create table head initially and custom fields area
+renderCustomFieldsArea();
+renderTableHead();
+render();
 
-  function todayISO(){ return new Date().toISOString().slice(0,10); }
+// add custom fields inputs to DOM (call after rendering custom cols)
+renderCustomFieldsArea();
 
-  function init(){
-    dateInput.value = todayISO();
-    loadRecords();
-    saveRecords();
-    refreshFormDefaults();
-    renderRecords();
+// attach clear
+els.clearBtn.addEventListener('click', clearForm);
 
-    bankSelect.addEventListener('change', refreshFormDefaults);
-    dateInput.addEventListener('change', refreshFormDefaults);
-    txnInput.addEventListener('input', updateClosingView);
-    openingInput.addEventListener('input', updateClosingView);
-    receiptRadio.addEventListener('change', updateClosingView);
-    paymentRadio.addEventListener('change', updateClosingView);
-    saveBtn.addEventListener('click', onSave);
-    clearBtn.addEventListener('click', onClear);
-    exportPDFBtn.addEventListener('click', onExportPDF);
-    searchInput.addEventListener('input', e => renderRecords(e.target.value));
+// handle storage event from other tabs
+window.addEventListener('storage', (e)=>{
+  if(e.key === RECORDS_KEY || e.key === COLS_KEY) render();
+});
 
-    countBadge.textContent = records.length;
-  }
-
-  init();
-})();
+// initial render call (in case)
+render();
 </script>
 </body>
 </html>
