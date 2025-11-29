@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Aruns E-Services Portal — Updated Final Version</title>
-
+  <title>Aruns E-Services Portal — With Total Backup/Restore</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
     body{font-family:"Segoe UI",Arial,sans-serif;background:#f0f4fb;color:#333;min-height:100vh;display:flex;flex-direction:column;}
@@ -34,7 +33,7 @@
       font-size:13px;
     }
 
-    .container{display:grid;grid-template-columns:250px 1fr;flex:1;height:calc(100vh - 160px);}
+    .container{display:grid;grid-template-columns:250px 1fr;flex:1;height:calc(100vh - 160px);background:transparent;}
     .sidebar{background:#e9eff7;border-right:2px solid #c3cbe0;padding:12px;overflow-y:auto;}
     .sidebar h3{color:#003366;margin-bottom:10px;font-size:16px;}
     .folder>div{cursor:pointer;padding:8px 10px;border-radius:6px;display:flex;align-items:center;justify-content:space-between;color:#003366;}
@@ -47,46 +46,22 @@
     iframe{width:100%;height:100%;border:none;}
 
     footer.main-footer{background:#002b5c;color:#fff;text-align:center;font-size:13px;padding:12px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+    .footer-left{display:flex;align-items:center;gap:12px;}
     .footer-actions button{padding:8px 12px;margin-left:8px;background:#004b8d;color:#fff;border:none;border-radius:6px;cursor:pointer;}
     .footer-actions button.total{background:#006400;}
+    .footer-actions button:disabled{opacity:0.5;cursor:not-allowed;}
 
-    /* POPUP */
-    #confirmPopup{
-      position:fixed;top:0;left:0;width:100%;height:100%;
-      background:rgba(0,0,0,0.55);display:none;
-      justify-content:center;align-items:center;z-index:99999;
-    }
-    #confirmBox{
-      background:white;width:320px;padding:22px;border-radius:12px;
-      text-align:center;box-shadow:0 0 25px rgba(0,0,0,0.25);
-      animation:pop .25s ease-out;
-    }
-    @keyframes pop{
-      from{transform:scale(.7);opacity:0;}
-      to{transform:scale(1);opacity:1;}
-    }
-    #confirmBox h3{margin-bottom:14px;color:#222;}
-    .popup-btn{
-      padding:8px 14px;border:none;border-radius:6px;margin:6px;font-size:15px;cursor:pointer;
-    }
-    .yes-btn{background:#0a7f00;color:#fff;}
-    .no-btn{background:#9b0000;color:#fff;}
+    .hint{font-size:12px;opacity:0.85;}
 
-    /* TOAST */
+    /* Toast */
     #toast {visibility:hidden;min-width:220px;max-width:420px;background:linear-gradient(135deg,#003366,#00aaff);color:#fff;text-align:center;border-radius:8px;padding:12px 18px;position:fixed;top:20px;right:20px;font-size:14px;box-shadow:0 0 12px rgba(0,255,255,0.18);opacity:0;transform:translateY(-10px);transition:opacity 0.35s, transform 0.35s;z-index:9999;}
     #toast.show {visibility:visible;opacity:1;transform:translateY(0);}
+
+    @media (max-width:800px){.container{grid-template-columns:1fr;} .sidebar{height:auto;order:2;} main{order:1;height:60vh;}}
+
   </style>
 </head>
 <body>
-
-<!-- POPUP -->
-<div id="confirmPopup">
-  <div id="confirmBox">
-    <h3 id="confirmMsg">Are you sure?</h3>
-    <button class="popup-btn yes-btn" id="popupYes">Yes</button>
-    <button class="popup-btn no-btn" id="popupNo">Cancel</button>
-  </div>
-</div>
 
 <!-- LOGIN PAGE -->
 <div id="loginPage">
@@ -99,25 +74,23 @@
   </div>
 </div>
 
-<!-- MAIN -->
+<!-- MAIN PAGE -->
 <div id="mainPage" aria-hidden="true">
-
   <header>
     <div style="display:flex;align-items:center;gap:12px;">
-      <img class="logo" src="https://upload.wikimedia.org/wikipedia/commons/5/5b/Bajaj_logo.jpg">
-      <div class="time-box">
-        <div id="engTime">Loading...</div>
-        <div id="nepTime">नेपाली मिति...</div>
+      <img class="logo" src="https://upload.wikimedia.org/wikipedia/commons/5/5b/Bajaj_logo.jpg" alt="Bajaj Logo">
+      <div class="time-box" aria-hidden="false">
+        <div class="eng" id="engTime">Loading...</div>
+        <div class="nep" id="nepTime">नेपाली मिति...</div>
       </div>
     </div>
 
     <div class="title">
-      <h1>🌐 𝗝𝗔𝗕𝗘𝗚𝗨𝗛𝗔𝗡𝗚 𝗠𝗨𝗟𝗧𝗜 𝗣𝗨𝗥𝗣𝗢𝗦𝗘 𝗖𝗢𝗠𝗣𝗔𝗬 🌐</h1>
+      <h1>🌐 𝗝𝗔𝗕𝗘𝗚𝗨𝗛𝗔𝗡𝗚 𝗠𝗨𝗟𝗧𝗜 𝗣𝗨𝗥𝗣𝗢𝗦𝗘 𝗖𝗢𝗠𝗣𝗔𝗬 𝗟𝘁𝗱.🌐</h1>
       <p class="hint">Database With Cloud Department</p>
     </div>
-
-    <img class="logo" src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Animated-nepal-flag-image-0007.gif">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/b/b9/Small_gif.gif" style="height:60px;">
+     <img class="logo" src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Animated-nepal-flag-image-0007.gif" alt="Nepal Flag">
+     <img src="https://upload.wikimedia.org/wikipedia/commons/b/b9/Small_gif.gif" alt="IRD Logo" style="height:60px;">
   </header>
 
   <div class="container">
@@ -125,178 +98,213 @@
       <h3>𝐎𝐧𝐥𝐢𝐧𝐞 𝐄-𝐒𝐞𝐫𝐯𝐢𝐜𝐞𝐬</h3>
 
       <div class="folder">
-        <div onclick="toggleFolder(this)">📁 Cash Records <span>▸</span></div>
+        <div onclick="toggleFolder(this)">📁 𝐂𝐚𝐬𝐡 𝐑𝐞𝐜𝐨𝐫𝐝𝐬 <span style="opacity:0.6;font-size:13px;">▸</span></div>
         <ul>
-         <li><a href="#" onclick="loadEsewaForm();return false;">🗁 Cash Transaction</a></li>
-         <li><a href="#" onclick="loadEsewaForm();return false;">🗁 Statement Report</a></li>
+          <li><a href="#" onclick="loadEsewaForm();return false;">🗁 Cash Transaction </a></li>
+          <li><a href="#" onclick="loadEsewaForm();return false;">🗁 Statement Report </a></li>
         </ul>
       </div>
 
       <div class="folder">
-        <div onclick="toggleFolder(this)">📁 Inquiry-Footfall <span>▸</span></div>
+        <div onclick="toggleFolder(this)">📁 𝐈𝐧𝐪𝐮𝐢𝐫𝐲-𝐅𝐨𝐨𝐭𝐟𝐚𝐥𝐥 <span style="opacity:0.6;font-size:13px;">▸</span></div>
         <ul>
-          <li><a href="Online E-Services/Collector/collector-details.html" target="contentFrame">🗁 Inquiry Form</a></li>
-          <li><a href="Online E-Services/Collector/collector-download.html" target="contentFrame">🗁 Record Download</a></li>
+         <li><a href="Online E-Services/Collector/collector-details.html" target="contentFrame">🗁 Inquiry Form</a></li>
+         <li><a href="Online E-Services/Collector/collector-download.html" target="contentFrame">🗁 Record Download</a></li>
         </ul>
       </div>
 
       <div class="folder">
-        <div onclick="toggleFolder(this)">📁 Vehicle Order Record <span>▸</span></div>
+        <div onclick="toggleFolder(this)">📁 𝐕𝐞𝐡𝐢𝐜𝐥𝐞 𝐎𝐫𝐝𝐞𝐫 𝐑𝐞𝐜𝐨𝐫𝐝 <span style="opacity:0.6;font-size:13px;">▸</span></div>
         <ul>
           <li><a href="Online E-Services/Banks/bank-statement-update.html" target="contentFrame">🗁 Order Updates</a></li>
-          <li><a href="Online E-Services/Banks/statement-download.html" target="contentFrame">🗁 Order Statement</a></li>
+          <li><a href="Online E-Services/Banks/statement-download.html" target="contentFrame">🗁 Order Statement </a></li>
         </ul>
       </div>
-
     </div>
 
     <main>
-      <iframe id="contentFrame" name="contentFrame"></iframe>
+      <iframe name="contentFrame" id="contentFrame" title="Content Frame"></iframe>
     </main>
   </div>
 
   <footer class="main-footer">
     <div class="footer-left">
       <div>© 2025 Database With Cloud Department</div>
-      <div style="font-size:12px;opacity:0.85;">(Logged in as <strong id="whoami">admin</strong>)</div>
+      <div style="font-size:12px;opacity:0.85;margin-left:8px;">(Logged in as <strong id="whoami">admin</strong>)</div>
     </div>
 
-    <div class="footer-actions">
-      <!-- ONLY TOTAL BACKUP / RESTORE -->
-      <button id="totalBackupBtn" class="total">📦 Total Backup</button>
-      <button id="totalRestoreBtn" class="total">🧭 Total Restore</button>
+    <div class="footer-actions" aria-live="polite">
+      <button id="totalBackupBtn" class="total" title="Total Backup (all localStorage)">📦 Total Backup</button>
+      <button id="totalRestoreBtn" class="total" title="Total Restore (overwrite all localStorage)">🧭 Total Restore</button>
       <button id="logoutBtn" style="background:#b02a2a;">🔒 Logout</button>
     </div>
   </footer>
-
 </div>
 
-<div id="toast">Status</div>
+<!-- TOAST -->
+<div id="toast" role="status" aria-live="polite">Status</div>
 
 <script>
-/* Popup handler */
-let popupAction = null;
-function askConfirm(msg, action){
-  popupAction = action;
-  document.getElementById("confirmMsg").textContent = msg;
-  document.getElementById("confirmPopup").style.display="flex";
-}
-document.getElementById("popupYes").onclick = ()=>{
-  document.getElementById("confirmPopup").style.display="none";
-  if(popupAction) popupAction();
-};
-document.getElementById("popupNo").onclick = ()=>{
-  document.getElementById("confirmPopup").style.display="none";
-};
-
-/* Toast */
-function showToast(msg){
-  const t=document.getElementById("toast");
-  t.textContent=msg;
-  t.classList.add("show");
-  setTimeout(()=>t.classList.remove("show"),3000);
-}
-
-/* LOGIN */
-document.getElementById('loginBtn').onclick = ()=>{
+/* LOGIN / LOGOUT */
+document.getElementById('loginBtn').addEventListener('click', ()=>{
   const u=document.getElementById('username').value.trim();
   const p=document.getElementById('password').value.trim();
-  if(u.toLowerCase()==="admin" && p==="Admin123"){
-    loginPage.style.display="none";
-    mainPage.style.display="flex";
-    whoami.textContent=u;
-    showToast("Welcome!");
+  const error=document.getElementById('error');
+  if(u.toLowerCase()==='admin' && p==='Admin123'){
+    document.getElementById('loginPage').style.display='none';
+    document.getElementById('mainPage').style.display='flex';
+    document.getElementById('mainPage').setAttribute('aria-hidden','false');
+    document.getElementById('whoami').textContent = u;
+    showToast("✅ Welcome, Admin!");
     loadDashboard();
   } else {
-    error.style.display="block";
-    setTimeout(()=>error.style.display="none",3000);
+    error.style.display='block';
+    setTimeout(()=>error.style.display='none',3000);
   }
-};
+});
+document.getElementById('logoutBtn').addEventListener('click', ()=>{
+  document.getElementById('username').value='';
+  document.getElementById('password').value='';
+  document.getElementById('mainPage').style.display='none';
+  document.getElementById('loginPage').style.display='flex';
+  document.getElementById('mainPage').setAttribute('aria-hidden','true');
+  document.getElementById('contentFrame').srcdoc = '';
+  showToast("🔒 Logged out");
+});
 
-logoutBtn.onclick = ()=>{
-  mainPage.style.display="none";
-  loginPage.style.display="flex";
-  contentFrame.srcdoc="";
-};
-
-/* Sidebar */
-function toggleFolder(e){ e.parentElement.classList.toggle("open"); }
-
-/* Dummy loaders */
-function loadEsewaForm(){
-  contentFrame.srcdoc="<h2 style='padding:20px;'>Esewa Form Placeholder</h2>";
+/* TOAST */
+function showToast(msg, ms=3600){
+  const t=document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), ms);
 }
 
-/* Dashboard */
-function safeParseLocal(k){
-  try{
-    let r=localStorage.getItem(k);
-    if(!r) return [];
-    const p=JSON.parse(r);
-    return Array.isArray(p)?p:[p];
-  }catch(e){return [];}
-}
-function loadDashboard(){
-  contentFrame.srcdoc="<h2 style='padding:20px;text-align:center;'>Dashboard Loaded</h2>";
-}
-
-/* TOTAL BACKUP (single file overwrite) */
-function totalBackupNow(){
-  try{
-    const out={_meta:{date:new Date().toISOString()}};
-    for(let i=0;i<localStorage.length;i++){
-      let k=localStorage.key(i);
-      out[k]=localStorage.getItem(k);
-    }
-    const blob=new Blob([JSON.stringify(out,null,2)],{type:"application/json"});
-    const a=document.createElement("a");
-    a.href=URL.createObjectURL(blob);
-    a.download="Backup.json"; 
-    a.click();
-    showToast("Backup.json successfully overwritten.");
-  }catch(e){
-    showToast("Backup failed.");
-  }
-}
-
-/* TOTAL RESTORE */
-function totalRestoreNow(){
-  const inp=document.createElement("input");
-  inp.type="file";
-  inp.accept="application/json";
-  inp.onchange=e=>{
-    const file=e.target.files[0];
-    if(!file) return;
-    const r=new FileReader();
-    r.onload=ev=>{
-      try{
-        const data=JSON.parse(ev.target.result);
-        localStorage.clear();
-        for(const k in data){ localStorage.setItem(k,data[k]); }
-        showToast("Total Restore Completed.");
-        loadDashboard();
-      }catch{
-        showToast("Invalid File.");
-      }
-    };
-    r.readAsText(file);
-  };
-  inp.click();
-}
-
-/* Attach with confirmation popup */
-totalBackupBtn.onclick = ()=> askConfirm("Create Backup.json and overwrite old file?", totalBackupNow);
-totalRestoreBtn.onclick = ()=> askConfirm("Restore all data from selected Backup.json?", totalRestoreNow);
-
-/* Clock */
+/* CLOCK */
 function updateHeaderTime(){
   const now=new Date();
-  engTime.textContent=now.toLocaleString();
-  nepTime.textContent="नेपाली मिति " + now.getSeconds();
+  const eng=now.toLocaleString('en-GB',{weekday:'short',year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  document.getElementById('engTime').textContent=eng;
+  document.getElementById('nepTime').textContent=getNepaliDateTime(now);
+}
+function getNepaliDateTime(date){
+  const npMonths=['बैशाख','जेठ','असार','साउन','भदौ','असोज','कात्तिक','मंसिर','पुष','माघ','फागुन','चैत'];
+  const npNumbers={'0':'०','1':'१','2':'२','3':'३','4':'४','5':'५','6':'६','7':'७','8':'८','9':'९'};
+  let y=date.getFullYear()+57;
+  let m=(date.getMonth()+1+8)%12;if(m===0)m=12;
+  let d=date.getDate();
+  const npDate=`${npMonths[m-1]} ${d}, ${y}`;
+  const h=String(date.getHours()).padStart(2,'0').replace(/[0-9]/g,d=>npNumbers[d]);
+  const mi=String(date.getMinutes()).padStart(2,'0').replace(/[0-9]/g,d=>npNumbers[d]);
+  const s=String(date.getSeconds()).padStart(2,'0').replace(/[0-9]/g,d=>npNumbers[d]);
+  return npDate.replace(/[0-9]/g,d=>npNumbers[d])+" ("+h+":"+mi+":"+s+")";
 }
 setInterval(updateHeaderTime,1000);
 updateHeaderTime();
-</script>
 
+/* SIDEBAR */
+function toggleFolder(el){ el.parentElement.classList.toggle('open'); }
+function loadEsewaForm(){ const f=document.getElementById('contentFrame'); f.srcdoc = `<html><head><meta charset="utf-8"><title>Esewa Form</title><style>body{font-family:Segoe UI;padding:20px;background:linear-gradient(135deg,#f6fbff,#ffffff);}h3{color:#003366}</style></head><body><h3>Esewa Form Section</h3><p>Existing code placeholder — integrate your existing form here.</p></body></html>`; }
+
+/* DASHBOARD */
+const APP_KEYS = ['esewa_entries_v1','collectorData_v_final','bank_statement_html_v2'];
+function safeParseLocal(key){
+  try{
+    const raw = localStorage.getItem(key);
+    if(raw === null) return [];
+    const parsed = JSON.parse(raw);
+    if(Array.isArray(parsed)) return parsed;
+    if(parsed && typeof parsed === 'object') return Object.values(parsed);
+    return [parsed];
+  }catch(e){ return []; }
+}
+function loadDashboard(){
+  const f=document.getElementById('contentFrame');
+  const esewa = safeParseLocal('esewa_entries_v1');
+  const collector = safeParseLocal('collectorData_v_final');
+  const bank = safeParseLocal('bank_statement_html_v2');
+  const doc = `
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <title>Dashboard</title>
+      <style>
+        body{font-family:Segoe UI;padding:30px;background:linear-gradient(135deg,#dfe9f3,#ffffff);}
+        h2{text-align:center;color:#002b5c;margin-bottom:20px;}
+        .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;}
+        .card{background:linear-gradient(135deg,#004e92,#000428);color:#fff;border-radius:12px;padding:18px;text-align:center;box-shadow:0 6px 20px rgba(0,0,0,0.15);}
+        .card h3{margin-bottom:10px;font-size:18px;}
+        .num{font-size:28px;font-weight:bold;color:#00e0ff;text-shadow:0 0 10px rgba(0,255,255,0.2);}
+        .muted{font-size:13px;opacity:0.85;margin-top:8px;}
+      </style>
+    </head>
+    <body>
+      <h2>📊 Dashboard Summary</h2>
+      <div class="cards">
+        <div class="card"><h3>Esewa Records</h3><div class="num">${esewa.length}</div><div class="muted">Key: esewa_entries_v1</div></div>
+        <div class="card"><h3>Collector Entries</h3><div class="num">${collector.length}</div><div class="muted">Key: collectorData_v_final</div></div>
+        <div class="card"><h3>Bank Statements</h3><div class="num">${bank.length}</div><div class="muted">Key: bank_statement_html_v2</div></div>
+      </div>
+      <script>
+        window.addEventListener('message', e => { if(e.data?.type === 'refreshCounts'){ location.reload(); }});
+      <\/script>
+    </body>
+    </html>`;
+  f.srcdoc = doc;
+}
+
+/* TOTAL BACKUP / TOTAL RESTORE */
+function buildFullLocalStorageObject(){
+  const out = { _meta: { createdAt: (new Date()).toISOString(), origin: location.href } };
+  for(let i=0;i<localStorage.length;i++){
+    const key = localStorage.key(i);
+    out[key] = localStorage.getItem(key);
+  }
+  return out;
+}
+function totalBackup(){
+  try{
+    const payload = buildFullLocalStorageObject();
+    const stamp = new Date().toISOString().replace(/[:.]/g,'-');
+    const filename = `TotalBackup-${stamp}.json`;
+    const blob = new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+    showToast(`📦 Total Backup Created`);
+  }catch(e){ showToast("❌ Backup Failed"); }
+}
+function totalRestore(){
+  const fileInput = document.createElement('input');
+  fileInput.type='file'; fileInput.accept='.json';
+  fileInput.onchange = e=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ev=>{
+      try{
+        const obj = JSON.parse(ev.target.result);
+        if(obj._meta){ // simple validation
+          localStorage.clear();
+          for(const k in obj){ if(k!=='_meta') localStorage.setItem(k,obj[k]); }
+          showToast("🧭 Total Restore Completed");
+          loadDashboard();
+        } else { showToast("❌ Invalid Backup File"); }
+      }catch(err){ showToast("❌ Restore Failed"); }
+    };
+    reader.readAsText(file);
+  };
+  fileInput.click();
+}
+
+/* BUTTON EVENTS */
+document.getElementById('totalBackupBtn').addEventListener('click', totalBackup);
+document.getElementById('totalRestoreBtn').addEventListener('click', totalRestore);
+
+/* INITIALIZE DEFAULT STORAGE */
+(function ensureDefaults(){
+  APP_KEYS.forEach(k=>{ if(localStorage.getItem(k)===null) localStorage.setItem(k,JSON.stringify([])); });
+})();
+</script>
 </body>
 </html>
