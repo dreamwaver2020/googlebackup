@@ -58,13 +58,7 @@
   </style>
 </head>
 <body>
-  <!-- 🔵 HEADER ADDED HERE -->
-    <div class="header-box">
-      <img src="logo.png" alt="Company Logo">
-      <div class="header-title">
-       👽 𝗝𝗔𝗕𝗘𝗚𝗨𝗛𝗔𝗡𝗚 𝗠𝗨𝗟𝗧𝗜 𝗣𝗨𝗥𝗣𝗢𝗦𝗘 𝗖𝗢𝗠𝗣𝗔𝗡𝗬 𝗟𝗧𝗗.
-      </div>
-    </div>
+
     <!-- END HEADER -->
   <div class="wrap">
     <div class="card">
@@ -103,9 +97,9 @@
 
           <label>8. Colour</label>
           <div class="radio-row" id="colourRadios">
-            <label><input type="radio" name="colour" value="Blue" checked> Blue</label>
-            <label><input type="radio" name="colour" value="Red"> Red</label>
-            <label><input type="radio" name="colour" value="Green"> Green</label>
+            <label><input type="radio" name="colour" value="Blue" checked> Blue🔵</label>
+            <label><input type="radio" name="colour" value="Red"> Red🔴</label>
+            <label><input type="radio" name="colour" value="Green">Green🟢</label>
           </div>
 
           <label for="financeSelect">9. Finance</label>
@@ -140,15 +134,15 @@
         <strong>15. Add Column (नयाँ कॉलम थप्न)</strong>
         <div style="margin-top:8px;" class="flex-row">
           <input id="newColName" type="text" placeholder="Column name (example: 'IMEI', 'ColorCode')" />
-          <button id="addColBtn" class="btn small">Add Column</button>
-          <button id="resetCols" class="btn small secondary">Reset Custom Columns</button>
+          <button id="addColBtn" class="btn small">🔗Add Column</button>
+          <button id="resetCols" class="btn small secondary">⚠️Reset Custom Columns</button>
         </div>
         <div class="small-note">यहाँ जोडिएका प्रत्येक कस्टम कॉलम फार्ममा र तालिकामा थपिन्छ र ब्राउजरमा बचाइन्छ।</div>
       </div>
 
       <div class="controls">
-        <button id="saveBtn" class="btn">Save</button>
-        <button id="clearBtn" class="btn secondary">Clear</button>
+        <button id="saveBtn" class="btn">💾Save</button>
+        <button id="clearBtn" class="btn secondary">🧹Clear</button>
 
         <div style="flex:1"></div>
 
@@ -161,14 +155,14 @@
       <div class="top-row">
         <div class="search-box">
           <input id="searchInput" type="text" placeholder="Search — client / model / engine / frame / sales / custom..." />
-          <button id="searchClear" class="btn small secondary">Clear</button>
+          <button id="searchClear" class="btn small secondary">🧹Clear</button>
         </div>
 
         <div style="display:flex; gap:8px; align-items:center;">
-          <button id="exportCsv" class="btn small">Export CSV</button>
-          <button id="exportPdf" class="btn small secondary">Export PDF</button>
-          <button id="backupBtn" class="btn small">Backup JSON</button>
-          <button id="restoreBtn" class="btn small secondary">Restore</button>
+          <button id="exportCsv" class="btn small">📝Export CSV</button>
+          <button id="exportPdf" class="btn small secondary">💾Export PDF</button>
+          <button id="backupBtn" class="btn small">👩🏽‍💻Backup JSON</button>
+          <button id="restoreBtn" class="btn small secondary">🟢Restore</button>
           <input id="restoreFile" type="file" accept="application/json" style="display:none" />
         </div>
       </div>
@@ -185,9 +179,9 @@
       </div>
 
       <div class="pager">
-        <button id="prevBtn" class="btn small secondary">⬅ Prev</button>
+        <button id="prevBtn" class="btn small secondary">⬅ Prev Page</button>
         <div class="info" id="pageInfo">Page 1 of 1</div>
-        <button id="nextBtn" class="btn small secondary">Next ➡</button>
+        <button id="nextBtn" class="btn small secondary">Next Page ➡</button>
       </div>
     </div>
   </div>
@@ -431,7 +425,7 @@ els.saveBtn.addEventListener('click', ()=>{
 
 // delete record
 function deleteRecord(id){
-  if(!confirm('के यो रेकर्ड मेटाउन निश्चित हुनुहुन्छ?')) return;
+  if(!confirm('⚠️𝐖𝐚𝐫𝐧𝐢𝐧𝐠: के यो रेकर्ड मेटाउन निश्चित हुनुहुन्छ?')) return;
   let arr = getRecords();
   arr = arr.filter(r=> r._id !== id);
   setRecords(arr);
