@@ -113,7 +113,8 @@
 
   <!-- ENTRY FORM -->
   <div class="card">
-    <h2>Foot Fails / Inquiry Entry Form</h2>
+    <h2>𝐅𝐨𝐨𝐭 𝐟𝐚𝐥𝐥 / 𝐈𝐧𝐪𝐮𝐢𝐫𝐲 𝐅𝐨𝐫𝐦</h2>
+    <h2>𝒫𝓁𝑒𝒶𝓈𝑒 𝑒𝓃𝓉𝑒𝓇 𝒴☯𝓊𝓇 𝒹𝒶𝓉𝒶</h2>
 
     <div class="form-grid">
       <div class="block">
@@ -152,8 +153,8 @@
 
         <label>Status</label>
         <div class="radio-row">
-          <label><input type="radio" name="status" value="Active" checked> Active</label>
-          <label><input type="radio" name="status" value="Pending"> Pending</label>
+          <label><input type="radio" name="status" value="Active" checked> Active ✔</label>
+          <label><input type="radio" name="status" value="Pending"> Pending ✗</label>
         </div>
 
         <label>Remarks</label>
@@ -163,8 +164,8 @@
     </div>
 
     <div class="controls">
-      <button id="saveBtn" class="btn">Save</button>
-      <button id="clearBtn" class="btn secondary">Clear</button>
+      <button id="saveBtn" class="btn">💾Save</button>
+      <button id="clearBtn" class="btn secondary">🧹Clear</button>
 
       <div style="flex:1"></div>
       <div>Total Records: <b id="totalCount">0</b></div>
@@ -177,8 +178,8 @@
     <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
       <input id="searchInput" type="text" placeholder="Search Name / Phone" style="padding:8px;width:220px;">
       <div>
-        <button id="exportCsv" class="btn small">Export CSV</button>
-        <button id="exportPdf" class="btn small secondary">Export PDF</button>
+        <button id="exportCsv" class="btn small">📃Export CSV</button>
+        <button id="exportPdf" class="btn small secondary">📝Export PDF</button>
       </div>
     </div>
 
@@ -330,7 +331,7 @@ window.editRecord = function(id){
 };
 
 window.deleteRecord = function(id){
-  if(!confirm("Delete this record?")) return;
+  if(!confirm("⚠️Warning: Delete this record Permanently?")) return;
   const arr = getData().filter(x=> x.id !== id);
   setData(arr);
   // if current page becomes empty after delete, step back a page
