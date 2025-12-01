@@ -239,10 +239,13 @@ function loadDashboard(){
     </head>
     <body>
       <h2></h2>
-      <div style="display:flex;align-items:center;gap:12px;">
-     <img src="https://upload.wikimedia.org/wikipedia/commons/f/f8/ChatGPT_Image_Nov_30%2C_2025%2C_07_23_35_PM.png" alt="Hoarding Board Logo" width="1200" height="400">
-      </div>
-      
+   
+<!-- Banner Image -->
+    <div style="padding:20px; text-align:center;">
+      <img src="images/banner.png"
+           alt="Company Banner"
+           style="width:53%; max-width:1200px; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.25);">
+    </div>
       <script>
         window.addEventListener('message', e => { if(e.data?.type === 'refreshCounts'){ location.reload(); }});
       <\/script>
